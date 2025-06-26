@@ -1,0 +1,246 @@
+:root {
+    --primary-color: #28a745;
+    --secondary-color: #007bff;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+    --info-color: #17a2b8;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+}
+
+body {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+/* Improved Sidebar */
+#sidebar {
+    width: 220px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--dark-color);
+    color: white;
+    padding-top: 15px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    overflow-y: hidden;
+    z-index: 1000;
+}
+
+#sidebar.active {
+    margin-left: -220px;
+}
+
+#sidebar .sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#sidebar .sidebar-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+#sidebar .sidebar-header small {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+#sidebar .list-unstyled.components {
+    padding: 0 10px;
+}
+
+#sidebar .list-unstyled.components li a {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    display: block;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-radius: 5px;
+    margin: 3px 0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#sidebar .list-unstyled.components li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+#sidebar .list-unstyled.components li.active>a,
+#sidebar .list-unstyled.components li[aria-current="page"]>a {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+#sidebar .list-unstyled.components li a i {
+    width: 20px;
+    text-align: center;
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+/* Content Area */
+#content {
+    margin-left: 220px;
+    padding: 20px;
+    transition: all 0.3s;
+    width: calc(100% - 220px);
+    min-height: 100vh;
+}
+
+#content.active {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Compact Cards */
+.card-dashboard {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.card-dashboard .card-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 15px;
+    font-weight: 600;
+    border-bottom: none;
+    font-size: 0.95rem;
+}
+
+.card-dashboard .card-header i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+.card-dashboard .card-body {
+    padding: 15px;
+}
+
+.card-icon {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.statistic-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 3px;
+}
+
+.statistic-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Compact Tables */
+.table-responsive-custom {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    background-color: white;
+    max-height: 400px;
+}
+
+.table-responsive-custom table {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+}
+
+.table-responsive-custom thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.table-responsive-custom th {
+    font-weight: 600;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+}
+
+.table-responsive-custom td {
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+.table-responsive-custom tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+/* Navbar */
+.navbar {
+    padding: 12px 15px;
+    border-radius: 8px !important;
+    margin-bottom: 15px;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Headings */
+h1 {
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--dark-color);
+}
+
+/* Badges */
+.badge {
+    padding: 5px 8px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -220px;
+    }
+
+    #sidebar.active {
+        margin-left: 0;
+    }
+
+    #content {
+        width: 100%;
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    #content.active {
+        width: 100%;
+    }
+
+    .table-responsive-custom {
+        max-height: none;
+    }
+}
