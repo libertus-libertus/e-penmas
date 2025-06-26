@@ -3,7 +3,7 @@
         <div class="container">
             <a class="navbar-brand animate__animated animate__fadeInLeft" href="#">
                 <i class="fas fa-hospital me-2" style="font-size: 1.8rem;"></i>
-                Puskesmas Sehat Selalu
+                Puskesmas Nanggalo Siteba
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

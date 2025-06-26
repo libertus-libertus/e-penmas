@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('title')
-    Dashboard Petugas Puskesmas Sehat Selalu
+    Dashboard Petugas Puskesmas Nanggalo Siteba
 @endsection
 
 @section('sub_title')

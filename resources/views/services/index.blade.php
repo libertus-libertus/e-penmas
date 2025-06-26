@@ -1,11 +1,11 @@
 @extends('layouts.dashboard') {{-- UBAH INI: Pastikan meng-extend 'main' --}}
 
 @section('title')
-Manajemen Pengguna
+Manajemen Jenis Pelayanan
 @endsection
 
 @section('sub_title')
-Manajemen Aktivitas Pengguna
+Manajemen Data Jenis Pelayanan
 @endsection
 
 @push('styles')
@@ -17,47 +17,43 @@ Manajemen Aktivitas Pengguna
 
 @section('content')
 
-{{-- Tabel Data Pengguna (Users) --}}
+{{-- Tabel Data Jenis Pelayanan --}}
 <div class="card card-dashboard mb-4" data-aos="fade-up" data-aos-delay="200">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-users-cog me-1"></i> Daftar Pengguna Sistem</span>
-        <a href="{{ route('users.create') }}" class="btn btn-action-primary btn-sm text-white">
-            <i class="fas fa-plus me-1"></i> Tambah Pengguna
+        <span><i class="fas fa-concierge-bell me-1"></i> Daftar Jenis Pelayanan</span>
+        <a href="{{ route('services.create') }}" class="btn btn-action-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Tambah Jenis Pelayanan
         </a>
     </div>
     <div class="card-body">
         <div class="table-responsive table-responsive-custom">
-            <table class="table table-hover table-striped w-100" id="usersTable">
+            <table class="table table-hover table-striped w-100" id="servicesTable">
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>Jabatan</th>
-                        <th>Dibuat Pada</th>
+                        <th>Nama Pelayanan</th>
+                        <th>Deskripsi</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($users as $user)
+                    @foreach($services as $service)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->position }}</td>
-                        <td>{{ $user->created_at->format('Y-m-d') }}</td>
+                        <td>{{ $service->name }}</td>
+                        <td>{{ $service->description }}</td>
                         <td class="text-center">
-                            <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm me-1">
+                            <a href="{{ route('services.show', $service->id) }}" class="btn btn-info btn-sm me-1">
                                 <i class="fas fa-eye"></i> Detail
                             </a>
-                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm me-1">
+                            <a href="{{ route('services.edit', $service->id) }}" class="btn btn-warning btn-sm me-1">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline" id="delete-form-{{ $user->id }}">
+                            <form action="{{ route('services.destroy', $service->id) }}" method="POST" class="d-inline" id="delete-form-{{ $service->id }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" class="btn btn-danger btn-sm btn-delete"
-                                    data-id="{{ $user->id }}" data-name="{{ $user->name }}">
+                                    data-id="{{ $service->id }}" data-name="{{ $service->name }}">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </form>
@@ -85,19 +81,19 @@ Manajemen Aktivitas Pengguna
 
 <script>
     $(document).ready(function () {
-        $('#usersTable').DataTable({
+        $('#servicesTable').DataTable({
             responsive: true,
             autoWidth: false
         });
 
         $('.btn-delete').on('click', function () {
-            const userId = $(this).data('id');
-            const userName = $(this).data('name');
-            const formId = '#delete-form-' + userId;
+            const serviceId = $(this).data('id');
+            const serviceName = $(this).data('name');
+            const formId = '#delete-form-' + serviceId;
 
             Swal.fire({
                 title: 'Yakin ingin menghapus?',
-                html: "Pengguna <strong>" + userName + "</strong> akan dihapus!",
+                html: "Jenis pelayanan <strong>" + serviceName + "</strong> akan dihapus!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Hapus!',

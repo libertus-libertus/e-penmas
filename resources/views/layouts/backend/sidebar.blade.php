@@ -6,8 +6,8 @@
     <ul class="list-unstyled components">
         {{-- KATEGORI: DASHBOARD UTAMA --}}
         <li class="sidebar-heading">Dashboard Utama</li>
-        <li aria-current="page">
-            <a href="#" class="active"><i class="fas fa-tachometer-alt me-1"></i> Ringkasan</a>
+        <li class="{{ Request::routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i> Ringkasan</a>
         </li>
 
         {{-- KATEGORI: DATA MASTER --}}
@@ -15,11 +15,12 @@
         <li>
             <a href="#"><i class="fas fa-users me-1"></i> Data Pasien</a>
         </li>
-        <li>
-            <a href="#"><i class="fas fa-notes-medical me-1"></i> Data Pelayanan</a> {{-- Asumsi ini untuk data jenis pelayanan --}}
+        {{-- MENU BARU: MANAJEMEN JENIS PELAYANAN --}}
+        <li class="{{ Request::routeIs('services.*') ? 'active' : '' }}">
+            <a href="{{ route('services.index') }}"><i class="fas fa-notes-medical me-1"></i> Manajemen Jenis Pelayanan</a>
         </li>
         <li>
-            <a href="#"><i class="fas fa-calendar-alt me-1"></i> Data Jadwal Layanan</a> {{-- Asumsi ini untuk data jadwal pelayanan --}}
+            <a href="#"><i class="fas fa-calendar-alt me-1"></i> Data Jadwal Layanan</a>
         </li>
 
 
@@ -47,16 +48,17 @@
             <a href="#"><i class="fas fa-chart-bar me-1"></i> Laporan Statistik</a>
         </li>
 
-        {{-- KATEGORI: PENGATURAN --}}
+        {{-- KATEGORI: PENGATURAN SISTEM --}}
         <li class="sidebar-heading mt-3">Pengaturan Sistem</li>
-        <li>
+        {{-- MENU: MANAJEMEN PETUGAS --}}
+        <li class="{{ Request::routeIs('users.*') ? 'active' : '' }}">
             <a href="{{ route('users.index') }}"><i class="fas fa-user-cog me-1"></i> Manajemen Petugas</a>
         </li>
 
         {{-- KATEGORI: LAIN-LAIN --}}
         <li class="sidebar-heading mt-3">Lain-lain</li>
         <li>
-            <a href="{{ url('/') }}" target="_blank"><i class="fas fa-globe me-1"></i> Lihat Website</a>
+            <a href="{{ url('/') }}" target="_blank"><i class="fas fa-globe me-1"></i> Lihat Website Frontend</a>
         </li>
         <li>
             <form method="POST" action="{{ route('logout') }}">

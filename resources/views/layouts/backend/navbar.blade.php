@@ -6,7 +6,7 @@
         <a class="navbar-brand ms-3 d-none d-md-block" href="#">Halo, {{ Auth::user()->name }}!</a>
         <div class="ms-auto">
             <span class="navbar-text">
-                Puskesmas Sehat Selalu | <span id="currentDateTime"></span>
+                Puskesmas Nanggalo Siteba | <span id="currentDateTime"></span>
             </span>
         </div>
     </div>

@@ -28,11 +28,11 @@
         </div>
         <div class="row mb-3">
             <div class="col-md-3"><strong>Dibuat Pada:</strong></div>
-            <div class="col-md-9">{{ $user->created_at->format('d M Y, H:i') }}</div>
+            <div class="col-md-9">{{ $user->created_at->format('d M Y') }}</div>
         </div>
         <div class="row mb-3">
             <div class="col-md-3"><strong>Terakhir Diperbarui:</strong></div>
-            <div class="col-md-9">{{ $user->updated_at->format('d M Y, H:i') }}</div>
+            <div class="col-md-9">{{ $user->updated_at->format('d M Y') }}</div>
         </div>
 
         <a href="{{ route('users.index') }}" class="btn btn-action-secondary me-2">Kembali ke Daftar</a>

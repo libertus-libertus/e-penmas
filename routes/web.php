@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController; // <-- Pastikan ini ada
 
@@ -26,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::resource('users', UserController::class);
+    Route::resource('services', ServiceController::class); 
 });
 
 // Ini adalah rute bawaan Breeze untuk autentikasi (login, register, forgot password, dll.)

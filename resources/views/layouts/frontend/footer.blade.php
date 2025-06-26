@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="100">
-                <h5>Puskesmas Sehat Selalu</h5>
+                <h5>Puskesmas Nanggalo Siteba</h5>
                 <p class="mb-4">Dedikasi kami untuk memberikan pelayanan kesehatan terbaik dan terdepan bagi masyarakat
                     Padang dan sekitarnya.</p>
                 <div class="footer-social-icons">
@@ -28,16 +28,16 @@
             <div class="col-md-4 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="300">
                 <h5>Informasi Kontak</h5>
                 <ul class="list-unstyled">
-                    <li class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Jl. Kesehatan No. 123, Padang</li>
-                    <li class="mb-3"><i class="fas fa-phone me-2"></i>(0751) 123456</li>
-                    <li class="mb-3"><i class="fas fa-envelope me-2"></i>info@puskesmassehatselalu.co.id</li>
+                    <li class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Jl. Padang Perumnas Siteba, Kel. Surau Gadang, Nanggalo, Padang City, West Sumatra 25173</li>
+                    <li class="mb-3"><i class="fas fa-phone me-2"></i>(0751) 7878690</li>
+                    <li class="mb-3"><i class="fas fa-envelope me-2"></i>puskesmasnanggalo_hcn@yahoo.co.id</li>
                     <li class="mb-3"><i class="fas fa-clock me-2"></i>Senin-Jumat: 08:00-16:00</li>
                 </ul>
             </div>
         </div>
         <hr class="my-4">
         <div class="text-center">
-            <p>&copy; 2025 Puskesmas Sehat Selalu. Hak Cipta Dilindungi.</p>
+            <p>&copy; 2025 Puskesmas Nanggalo Siteba. Hak Cipta Dilindungi.</p>
         </div>
     </div>
 </footer>
