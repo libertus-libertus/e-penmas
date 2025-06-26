@@ -18,7 +18,7 @@ body {
 }
 
 /* Improved Sidebar */
-#sidebar {
+/* #sidebar {
     width: 220px;
     height: 100vh;
     position: fixed;
@@ -31,6 +31,33 @@ body {
     transition: all 0.3s;
     overflow-y: hidden;
     z-index: 1000;
+} */
+
+/* Improved Sidebar */
+#sidebar {
+    width: 220px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--dark-color);
+    color: white;
+    padding-top: 15px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    overflow-y: auto; /* Tetap auto agar bisa di-scroll */
+    z-index: 1000;
+
+    /* Sembunyikan scrollbar untuk browser berbasis WebKit (Chrome, Safari, Edge) */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Sembunyikan scrollbar untuk WebKit browsers (Chrome, Safari, Edge) */
+#sidebar::-webkit-scrollbar {
+    display: none; /* Menyembunyikan bilah gulir */
+    width: 0; /* Untuk memastikan tidak ada ruang yang diambil */
+    height: 0;
 }
 
 #sidebar.active {

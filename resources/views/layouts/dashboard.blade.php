@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
 
     <!-- Stack untuk CSS tambahan per halaman (misal: Datatables CSS) -->
-    @stack('css')
+    @stack('styles')
 </head>
 <body>
 
@@ -55,8 +55,68 @@
     
     <!-- Custom JS Anda (yang sudah dipisahkan ke public/backend/js/script.js) -->
     <script src="{{ asset('backend/js/script.js') }}"></script>
+    <script>
+        // Global SweetAlert2 (for delete confirmation)
+        window.confirmDelete = function (formId) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data ini akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
+        }
+
+        // Inisialisasi Toastr untuk pesan flash
+        if (typeof toastr !== 'undefined') { // Cek apakah toastr sudah dimuat
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            // Tangani pesan dari session flash
+            @if(Session::has('success'))
+                toastr.success("{{ Session::get('success') }}");
+            @endif
+
+            @if(Session::has('error'))
+                toastr.error("{{ Session::get('error') }}");
+            @endif
+
+            @if(Session::has('warning'))
+                toastr.warning("{{ Session::get('warning') }}");
+            @endif
+
+            @if(Session::has('info'))
+                toastr.info("{{ Session::get('info') }}");
+            @endif
+
+            // Tangani pesan error validasi ($errors)
+            @if($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.error("{{ $error }}");
+                @endforeach
+            @endif
+        }
+    </script>
 
     <!-- Stack untuk JS tambahan per halaman (misal: Datatables JS dan inisialisasi) -->
-    @stack('js')
+    @stack('scripts')
 </body>
 </html>

@@ -38,23 +38,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     updateDateTime(); // Call once immediately
     setInterval(updateDateTime, 1000); // Update every second
-
-    // Global SweetAlert2 (for delete confirmation)
-    // Make sure SweetAlert2 is loaded via CDN or NPM in your layout or specific page
-    window.confirmDelete = function(formId) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini akan dihapus secara permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById(formId).submit();
-            }
-        });
-    }
 });
