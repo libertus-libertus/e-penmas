@@ -9,12 +9,16 @@ class Service extends Model
 {
     use HasFactory;
 
-    // Mendefinisikan nama tabel jika tidak sesuai dengan konvensi Laravel (plural dari nama model)
-    protected $table = 'services';
-
-    // Kolom yang dapat diisi secara massal
     protected $fillable = [
         'name',
         'description',
     ];
+
+    /**
+     * Relasi: Jenis Pelayanan (Service) memiliki banyak Jadwal Layanan (ServiceSchedule).
+     */
+    public function serviceSchedules()
+    {
+        return $this->hasMany(ServiceSchedule::class);
+    }
 }

@@ -15,12 +15,13 @@
         <li>
             <a href="#"><i class="fas fa-users me-1"></i> Data Pasien</a>
         </li>
-        {{-- MENU BARU: MANAJEMEN JENIS PELAYANAN --}}
+        {{-- MENU: MANAJEMEN JENIS PELAYANAN --}}
         <li class="{{ Request::routeIs('services.*') ? 'active' : '' }}">
             <a href="{{ route('services.index') }}"><i class="fas fa-notes-medical me-1"></i> Manajemen Jenis Pelayanan</a>
         </li>
-        <li>
-            <a href="#"><i class="fas fa-calendar-alt me-1"></i> Data Jadwal Layanan</a>
+        {{-- MENU BARU: MANAJEMEN JADWAL PELAYANAN --}}
+        <li class="{{ Request::routeIs('service_schedules.*') ? 'active' : '' }}">
+            <a href="{{ route('service_schedules.index') }}"><i class="fas fa-calendar-alt me-1"></i> Manajemen Jadwal Layanan</a>
         </li>
 
 
