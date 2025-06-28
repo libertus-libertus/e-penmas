@@ -28,10 +28,10 @@
             <dd class="col-sm-9">{{ $service->updated_at->format('d M Y') }}</dd>
         </dl>
 
-        <a href="{{ route('services.index') }}" class="btn btn-action-secondary me-2">
+        <a href="{{ route('services.index') }}" class="btn btn-secondary me-2">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
-        <a href="{{ route('services.edit', $service->id) }}" class="btn btn-action-primary">
+        <a href="{{ route('services.edit', $service->id) }}" class="btn btn-primary">
             <i class="fas fa-edit"></i> Edit Pelayanan
         </a>
     </div>

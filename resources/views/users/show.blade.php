@@ -35,8 +35,8 @@
             <div class="col-md-9">{{ $user->updated_at->format('d M Y') }}</div>
         </div>
 
-        <a href="{{ route('users.index') }}" class="btn btn-action-secondary me-2">Kembali ke Daftar</a>
-        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-action-primary">Edit Pengguna Ini</a>
+        <a href="{{ route('users.index') }}" class="btn btn-secondary me-2">Kembali ke Daftar</a>
+        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary">Edit Pengguna Ini</a>
     </div>
 </div>
 @endsection

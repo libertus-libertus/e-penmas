@@ -53,8 +53,8 @@
                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
             </div>
 
-            <a href="{{ route('users.index') }}" class="btn btn-action-secondary me-2">Batal</a>
-            <button type="submit" class="btn btn-action-primary">Update Pengguna</button>
+            <a href="{{ route('users.index') }}" class="btn btn-secondary me-2">Batal</a>
+            <button type="submit" class="btn btn-primary">Update Pengguna</button>
         </form>
     </div>
 </div>

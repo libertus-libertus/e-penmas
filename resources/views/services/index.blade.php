@@ -21,7 +21,7 @@ Manajemen Data Jenis Pelayanan
 <div class="card card-dashboard mb-4" data-aos="fade-up" data-aos-delay="200">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-concierge-bell me-1"></i> Daftar Jenis Pelayanan</span>
-        <a href="{{ route('services.create') }}" class="btn btn-action-primary btn-sm">
+        <a href="{{ route('services.create') }}" class="btn text-white btn-sm">
             <i class="fas fa-plus me-1"></i> Tambah Jenis Pelayanan
         </a>
     </div>

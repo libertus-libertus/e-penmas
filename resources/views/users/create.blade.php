@@ -61,8 +61,8 @@
                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
             </div>
 
-            <a href="{{ route('users.index') }}" class="btn btn-action-secondary me-2">Batal</a>
-            <button type="submit" class="btn btn-action-primary">Simpan Pengguna</button>
+            <a href="{{ route('users.index') }}" class="btn btn-secondary me-2">Batal</a>
+            <button type="submit" class="btn btn-primary">Simpan Pengguna</button>
         </form>
     </div>
 </div>

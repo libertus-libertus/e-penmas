@@ -38,8 +38,8 @@
                 @enderror
             </div>
 
-            <a href="{{ route('services.index') }}" class="btn btn-action-secondary me-2">Batal</a>
-            <button type="submit" class="btn btn-action-primary">Update Pelayanan</button>
+            <a href="{{ route('services.index') }}" class="btn btn-secondary me-2">Batal</a>
+            <button type="submit" class="btn btn-primary">Update Pelayanan</button>
         </form>
     </div>
 </div>
