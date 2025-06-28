@@ -14,7 +14,9 @@
         <div class="card card-dashboard text-center">
             <div class="card-body">
                 <i class="fas fa-users card-icon"></i>
-                <div class="statistic-value text-success">150</div>
+                <div class="statistic-value text-success">
+                    {{ \App\Models\User::where('role', 'patient')->count() }}
+                </div>
                 <div class="statistic-label">Pasien Terdaftar</div>
             </div>
         </div>

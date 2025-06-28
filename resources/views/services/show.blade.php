@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('title')
-    Detail Jenis Pelayanan - Puskesmas Sehat Selalu
+    Detail Jenis Pelayanan - Puskesmas Nanggalo Siteba
 @endsection
 
 @section('sub_title')

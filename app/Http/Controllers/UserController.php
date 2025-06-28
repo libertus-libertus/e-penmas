@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\PatientDetail; // Import model PatientDetail - TETAPKAN INI UNTUK MIGRASI DAN MODEL
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 // Hapus atau komen baris ini jika tidak menggunakan Yajra Datatables
@@ -12,14 +13,17 @@ class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * Mengambil semua data pengguna untuk ditampilkan di tabel Datatables client-side.
+     * Mengambil semua data pengguna (admin dan staff) untuk ditampilkan di tabel Datatables client-side.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        // Ambil semua data pengguna dari database, diurutkan berdasarkan terbaru
-        $users = User::select('id', 'name', 'email', 'position', 'created_at')->latest()->get();
+        // Ambil semua data pengguna dengan role 'admin' atau 'staff' saja
+        $users = User::whereIn('role', ['admin', 'staff']) // <-- FILTER ROLE
+                    ->select('id', 'name', 'email', 'role', 'position', 'created_at')
+                    ->latest()
+                    ->get();
 
         // Kirimkan koleksi pengguna ke view
         return view('users.index', compact('users'));
@@ -27,13 +31,15 @@ class UserController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     * Menampilkan form untuk menambah pengguna baru.
+     * Menampilkan form untuk menambah pengguna baru (hanya admin/staff).
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        return view('users.create');
+        // Mendefinisikan pilihan role hanya untuk admin dan staff
+        $roles = ['admin', 'staff']; // <-- HANYA ADMIN DAN STAFF
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -48,48 +54,66 @@ class UserController extends Controller
         // Validasi data input dari form
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email', // Email harus unik
-            'position' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed', // Password minimal 8 karakter dan harus dikonfirmasi
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'role' => 'required|in:admin,staff', // <-- HANYA ADMIN DAN STAFF
+            'position' => 'nullable|string|max:255', // Position sekarang nullable
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         try {
-            User::create([
+            // Buat pengguna baru di tabel users
+            $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'position' => $request->position,
-                'password' => Hash::make($request->password), // Hash password sebelum disimpan
+                'role' => $request->role,
+                // Position hanya diisi jika role adalah admin atau staff, jika tidak, set null
+                'position' => in_array($request->role, ['admin', 'staff']) ? $request->position : null,
+                'password' => Hash::make($request->password),
             ]);
-            // Pesan sukses yang akan ditangkap oleh Toastr
+
+            // HAPUS LOGIKA PEMBUATAN PATIENTDETAIL DI SINI
+            // PatientDetail hanya dibuat melalui modul Manajemen Data Pasien
+            // if ($user->role === 'patient') { ... }
+
             return redirect()->route('users.index')->with('success', 'Pengguna berhasil ditambahkan!');
         } catch (\Exception $e) {
-            // Tangani error jika terjadi masalah saat menyimpan
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan pengguna: ' . $e->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
-     * Menampilkan detail pengguna.
+     * Menampilkan detail pengguna (admin dan staff).
      *
-     * @param  \App\Models\User  $user (Laravel otomatis mengikat model User)
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
+        // Pastikan hanya admin/staff yang bisa dilihat di sini
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            return redirect()->route('users.index')->with('error', 'User ini bukan admin atau staff.');
+        }
+        // HAPUS LOGIKA LOADEAGER UNTUK PATIENTDETAIL
+        // if ($user->hasRole('patient')) { $user->load('patientDetail'); }
         return view('users.show', compact('user'));
     }
 
     /**
      * Show the form for editing the specified resource.
-     * Menampilkan form untuk mengedit pengguna.
+     * Menampilkan form untuk mengedit pengguna (admin dan staff).
      *
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        // Pastikan hanya admin/staff yang bisa diedit dari sini
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            return redirect()->route('users.index')->with('error', 'User ini bukan admin atau staff, tidak bisa diedit dari modul ini.');
+        }
+        $roles = ['admin', 'staff']; // <-- HANYA ADMIN DAN STAFF
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -102,45 +126,59 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        // Validasi data input untuk update
+        // Pastikan hanya admin/staff yang bisa diedit dari sini
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            return redirect()->route('users.index')->with('error', 'User ini bukan admin atau staff, tidak bisa diperbarui dari modul ini.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id, // Email unik kecuali untuk ID yang sedang diupdate
-            'position' => 'required|string|max:255',
-            'password' => 'nullable|string|min:8|confirmed', // Password bisa kosong jika tidak ingin diubah
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'role' => 'required|in:admin,staff', // <-- HANYA ADMIN DAN STAFF
+            'position' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         try {
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->position = $request->position;
+            $user->role = $request->role;
+            // Set position null jika role bukan admin/staff, atau gunakan input
+            $user->position = in_array($request->role, ['admin', 'staff']) ? $request->position : null;
+
             if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
             }
             $user->save();
-            // Pesan sukses yang akan ditangkap oleh Toastr
+
+            // HAPUS LOGIKA PEMBUATAN/PENGHAPUSAN PATIENTDETAIL DI SINI
+            // if ($user->role === 'patient' && !$user->patientDetail) { ... }
+            // elseif (!$user->hasRole('patient') && $user->patientDetail) { ... }
+
+
             return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui!');
         } catch (\Exception $e) {
-            // Tangani error jika terjadi masalah saat memperbarui
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui pengguna: ' . $e->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
-     * Menghapus pengguna dari database.
+     * Menghapus pengguna (admin dan staff) dari database.
      *
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
     {
+        // Pastikan hanya admin/staff yang bisa dihapus dari sini
+        if (!in_array($user->role, ['admin', 'staff'])) {
+            return redirect()->route('users.index')->with('error', 'User ini bukan admin atau staff, tidak bisa dihapus dari modul ini.');
+        }
         try {
-            $user->delete(); // Menggunakan delete() method dari model Eloquent
-            // Pesan sukses yang akan ditangkap oleh Toastr
+            $user->delete();
             return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus!');
         } catch (\Exception $e) {
-            // Tangani error jika terjadi masalah saat menghapus
             return redirect()->route('users.index')->with('error', 'Gagal menghapus pengguna: ' . $e->getMessage());
         }
     }

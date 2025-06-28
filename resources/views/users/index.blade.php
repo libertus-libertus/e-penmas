@@ -30,9 +30,9 @@ Manajemen Aktivitas Pengguna
             <table class="table table-hover table-striped w-100" id="usersTable">
                 <thead>
                     <tr>
-                        <th>No</th>
                         <th>Nama</th>
                         <th>Email</th>
+                        <th>Role</th> {{-- Kolom baru: Role --}}
                         <th>Jabatan</th>
                         <th>Dibuat Pada</th>
                         <th>Aksi</th>
@@ -41,10 +41,17 @@ Manajemen Aktivitas Pengguna
                 <tbody>
                     @foreach($users as $user)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td>{{ $user->position }}</td>
+                        <td>
+                            <span class="badge {{
+                                $user->role == 'admin' ? 'bg-danger' :
+                                ($user->role == 'staff' ? 'bg-info' : 'bg-secondary')
+                            }}">
+                                {{ Str::title($user->role) }} {{-- Menampilkan role dengan huruf kapital di awal --}}
+                            </span>
+                        </td>
+                        <td>{{ $user->position ?? '-' }}</td> {{-- Tampilkan '-' jika jabatan null --}}
                         <td>{{ $user->created_at->format('Y-m-d') }}</td>
                         <td class="text-center">
                             <a href="{{ route('users.show', $user->id) }}" class="btn btn-info btn-sm me-1">

@@ -21,7 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'position', // Tambahkan baris ini
+        'position',
+        'role',
     ];
 
     /**
@@ -45,5 +46,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relasi: User dengan role 'patient' memiliki satu PatientDetail.
+     */
+    public function patientDetail()
+    {
+        return $this->hasOne(PatientDetail::class);
+    }
+
+    /**
+     * Helper: Cek apakah user memiliki role tertentu.
+     */
+    public function hasRole($role)
+    {
+        return $this->role === $role;
     }
 }

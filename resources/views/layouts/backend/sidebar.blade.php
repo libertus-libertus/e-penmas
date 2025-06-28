@@ -12,16 +12,21 @@
 
         {{-- KATEGORI: DATA MASTER --}}
         <li class="sidebar-heading mt-3">Data Master</li>
-        <li>
-            <a href="#"><i class="fas fa-users me-1"></i> Data Pasien</a>
+        {{-- MENU: MANAJEMEN PETUGAS --}}
+        <li class="{{ Request::routeIs('users.*') ? 'active' : '' }}">
+            <a href="{{ route('users.index') }}"><i class="fas fa-user-cog me-1"></i> Manajemen Petugas</a>
         </li>
         {{-- MENU: MANAJEMEN JENIS PELAYANAN --}}
         <li class="{{ Request::routeIs('services.*') ? 'active' : '' }}">
             <a href="{{ route('services.index') }}"><i class="fas fa-notes-medical me-1"></i> Manajemen Jenis Pelayanan</a>
         </li>
-        {{-- MENU BARU: MANAJEMEN JADWAL PELAYANAN --}}
+        {{-- MENU: MANAJEMEN JADWAL PELAYANAN --}}
         <li class="{{ Request::routeIs('service_schedules.*') ? 'active' : '' }}">
             <a href="{{ route('service_schedules.index') }}"><i class="fas fa-calendar-alt me-1"></i> Manajemen Jadwal Layanan</a>
+        </li>
+        {{-- MENU BARU: MANAJEMEN DATA PASIEN --}}
+        <li class="{{ Request::routeIs('patients.*') ? 'active' : '' }}">
+            <a href="{{ route('patients.index') }}"><i class="fas fa-users me-1"></i> Manajemen Data Pasien</a>
         </li>
 
 
@@ -47,13 +52,6 @@
         </li>
         <li>
             <a href="#"><i class="fas fa-chart-bar me-1"></i> Laporan Statistik</a>
-        </li>
-
-        {{-- KATEGORI: PENGATURAN SISTEM --}}
-        <li class="sidebar-heading mt-3">Pengaturan Sistem</li>
-        {{-- MENU: MANAJEMEN PETUGAS --}}
-        <li class="{{ Request::routeIs('users.*') ? 'active' : '' }}">
-            <a href="{{ route('users.index') }}"><i class="fas fa-user-cog me-1"></i> Manajemen Petugas</a>
         </li>
 
         {{-- KATEGORI: LAIN-LAIN --}}

@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('title')
-    Edit Jadwal Pelayanan - Puskesmas Sehat Selalu
+    Edit Jadwal Pelayanan - Puskesmas Nanggalo Siteba
 @endsection
 
 @section('sub_title')
