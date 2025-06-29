@@ -33,26 +33,19 @@
         {{-- KATEGORI: OPERASIONAL --}}
         <li class="sidebar-heading mt-3">Operasional</li>
         {{-- MENU: PENDAFTARAN & ANTRIAN --}}
-        {{-- Ini akan mengarah ke index Registrations, yang menampilkan daftar dan status antrean --}}
         <li class="{{ Request::routeIs('registrations.*') ? 'active' : '' }}">
             <a href="{{ route('registrations.index') }}"><i class="fas fa-clipboard-list me-1"></i> Pendaftaran & Antrean</a>
         </li>
-        {{-- Menu 'Registrasi Pasien' yang terpisah bisa dihapus atau digabungkan ke 'Pendaftaran & Antrean' jika fungsi utamanya adalah membuat pendaftaran kunjungan --}}
-        {{-- <li>
-            <a href="#"><i class="fas fa-user-plus me-1"></i> Registrasi Pasien</a>
-        </li> --}}
-        {{-- Menu 'Manajemen Antrean' yang terpisah bisa dihapus atau digabungkan ke 'Pendaftaran & Antrean' --}}
-        {{-- <li>
-            <a href="#"><i class="fas fa-hand-pointer me-1"></i> Manajemen Antrean</a>
-        </li> --}}
-        <li>
-            <a href="#"><i class="fas fa-stethoscope me-1"></i> Pencatatan Pelayanan</a>
+        {{-- MENU BARU: PENCATATAN PELAYANAN --}}
+        <li class="{{ Request::routeIs('appointments.*') ? 'active' : '' }}">
+            <a href="{{ route('appointments.index') }}"><i class="fas fa-stethoscope me-1"></i> Pencatatan Pelayanan</a>
         </li>
 
         {{-- KATEGORI: LAPORAN & RIWAYAT --}}
         <li class="sidebar-heading mt-3">Laporan & Riwayat</li>
-        <li>
-            <a href="#"><i class="fas fa-history me-1"></i> Riwayat Kunjungan</a>
+        {{-- MENU BARU: RIWAYAT KUNJUNGAN --}}
+        <li class="{{ Request::routeIs('patient_visits.*') ? 'active' : '' }}"> {{-- Siapkan untuk modul patient_visits --}}
+            <a href="#"><i class="fas fa-history me-1"></i> Riwayat Kunjungan</a> {{-- Link sementara ke '#' jika route belum ada --}}
         </li>
         <li>
             <a href="#"><i class="fas fa-chart-bar me-1"></i> Laporan Statistik</a>

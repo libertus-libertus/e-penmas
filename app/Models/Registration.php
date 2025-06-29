@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Import SoftDeletes trait
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Registration extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes trait
+    use HasFactory, SoftDeletes;
 
-    // Fillable columns for mass assignment
+    // Kolom yang dapat diisi secara massal
     protected $fillable = [
         'patient_detail_id',
         'service_id',
@@ -19,17 +19,17 @@ class Registration extends Model
         'status',
     ];
 
-    // Cast specific columns to desired types
+    // Mengubah tipe data untuk kolom tertentu jika diperlukan
     protected $casts = [
         'visit_date' => 'date',
     ];
 
-    // Define 'deleted_at' column as a date
+    // Tentukan kolom 'deleted_at' sebagai tanggal
     protected $dates = ['deleted_at'];
 
     /**
-     * Define a one-to-many relationship with PatientDetail.
-     * A registration belongs to one patient detail.
+     * Definisi relasi One-to-Many dengan PatientDetail.
+     * Sebuah pendaftaran dimiliki oleh satu detail pasien.
      */
     public function patientDetail()
     {
@@ -37,8 +37,8 @@ class Registration extends Model
     }
 
     /**
-     * Define a many-to-one relationship with Service.
-     * A registration is associated with one service type.
+     * Definisi relasi Many-to-One dengan Service.
+     * Sebuah pendaftaran terkait dengan satu jenis layanan.
      */
     public function service()
     {
@@ -46,11 +46,21 @@ class Registration extends Model
     }
 
     /**
-     * Define a one-to-one relationship with Queue.
-     * Each registration has one queue entry.
+     * Definisi relasi One-to-One dengan Queue.
+     * Setiap pendaftaran memiliki satu antrean.
      */
     public function queue()
     {
         return $this->hasOne(Queue::class);
+    }
+
+    /**
+     * Definisi relasi One-to-One dengan Appointment.
+     * Setiap pendaftaran dapat memiliki satu catatan pelayanan.
+     * WAJIB: Relasi ini ditambahkan untuk menyelesaikan error.
+     */
+    public function appointment()
+    {
+        return $this->hasOne(Appointment::class);
     }
 }

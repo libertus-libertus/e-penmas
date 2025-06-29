@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PatientDetailController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ServiceController;
@@ -40,6 +41,8 @@ Route::middleware(['auth'])->group(function () {
     // MODUL BARU: PENDAFTARAN PASIEN & ANTRIAN
     Route::resource('registrations', RegistrationController::class);
     Route::get('registrations/{id}/print', [RegistrationController::class, 'printQueue'])->name('registrations.print');
+
+    Route::resource('appointments', AppointmentController::class);
 });
 
 // Ini adalah rute bawaan Breeze untuk autentikasi (login, register, forgot password, dll.)
