@@ -6,6 +6,7 @@ use App\Models\Registration;
 use App\Models\Queue;
 use App\Models\PatientDetail;
 use App\Models\Service;
+use App\Models\PatientVisit; // WAJIB: Import PatientVisit model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +39,7 @@ class RegistrationController extends Controller
                 $q->where('status', $request->queue_status);
             });
         }
+
 
         $registrations = $query->orderBy('visit_date', 'desc')
                                 ->orderBy('queue_number', 'asc')
@@ -99,7 +101,6 @@ class RegistrationController extends Controller
 
             DB::commit();
 
-            // --- PERUBAHAN DI SINI: Redirect ke halaman cetak ---
             return redirect()->route('registrations.print', $registration->id)->with('success', 'Pendaftaran berhasil dibuat dan struk antrean siap dicetak.');
 
         } catch (ValidationException $e) {
@@ -183,9 +184,23 @@ class RegistrationController extends Controller
             $queue->status = $request->status;
             $queue->save();
 
+            // Registration status should be 'completed' if the queue status becomes 'completed'
             if ($request->status === 'completed') {
                 $registration->status = 'completed';
                 $registration->save();
+
+                // --- WAJIB: Otomatisasi pencatatan patient_visits di sini ---
+                PatientVisit::firstOrCreate(
+                    [
+                        'patient_detail_id' => $registration->patient_detail_id,
+                        'service_id' => $registration->service_id,
+                        'visit_date' => $registration->visit_date,
+                    ],
+                    [
+                        'status' => 'completed', // Status kunjungan awal saat dibuat otomatis
+                    ]
+                );
+                // -------------------------------------------------------------
             }
 
             DB::commit();
@@ -225,6 +240,13 @@ class RegistrationController extends Controller
                 $registration->queue->status = 'cancelled';
                 $registration->queue->save();
             }
+
+            // Optional: If a patient visit was automatically created,
+            // you might want to cancel it here as well.
+            // PatientVisit::where('patient_detail_id', $registration->patient_detail_id)
+            //             ->where('service_id', $registration->service_id)
+            //             ->where('visit_date', $registration->visit_date)
+            //             ->update(['status' => 'canceled']);
 
             DB::commit();
 

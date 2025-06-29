@@ -36,7 +36,7 @@
         <li class="{{ Request::routeIs('registrations.*') ? 'active' : '' }}">
             <a href="{{ route('registrations.index') }}"><i class="fas fa-clipboard-list me-1"></i> Pendaftaran & Antrean</a>
         </li>
-        {{-- MENU BARU: PENCATATAN PELAYANAN --}}
+        {{-- MENU: PENCATATAN PELAYANAN --}}
         <li class="{{ Request::routeIs('appointments.*') ? 'active' : '' }}">
             <a href="{{ route('appointments.index') }}"><i class="fas fa-stethoscope me-1"></i> Pencatatan Pelayanan</a>
         </li>
@@ -44,8 +44,8 @@
         {{-- KATEGORI: LAPORAN & RIWAYAT --}}
         <li class="sidebar-heading mt-3">Laporan & Riwayat</li>
         {{-- MENU BARU: RIWAYAT KUNJUNGAN --}}
-        <li class="{{ Request::routeIs('patient_visits.*') ? 'active' : '' }}"> {{-- Siapkan untuk modul patient_visits --}}
-            <a href="#"><i class="fas fa-history me-1"></i> Riwayat Kunjungan</a> {{-- Link sementara ke '#' jika route belum ada --}}
+        <li class="{{ Request::routeIs('patient_visits.*') ? 'active' : '' }}">
+            <a href="{{ route('patient_visits.index') }}"><i class="fas fa-history me-1"></i> Riwayat Kunjungan</a>
         </li>
         <li>
             <a href="#"><i class="fas fa-chart-bar me-1"></i> Laporan Statistik</a>
