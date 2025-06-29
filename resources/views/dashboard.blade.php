@@ -8,6 +8,11 @@
     Ringkasan Dashboard
 @endsection
 
+@push('scripts')
+{{-- Chart.js CDN for charts --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endpush
+
 @section('content')
 <div class="row mb-3 g-3">
     <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
@@ -15,7 +20,7 @@
             <div class="card-body">
                 <i class="fas fa-users card-icon"></i>
                 <div class="statistic-value text-success">
-                    {{ \App\Models\User::where('role', 'patient')->count() }}
+                    {{ $totalPatients }}
                 </div>
                 <div class="statistic-label">Pasien Terdaftar</div>
             </div>
@@ -25,7 +30,7 @@
         <div class="card card-dashboard text-center">
             <div class="card-body">
                 <i class="fas fa-clipboard-list card-icon"></i>
-                <div class="statistic-value text-info">35</div>
+                <div class="statistic-value text-info">{{ $todayRegistrations }}</div>
                 <div class="statistic-label">Pendaftaran Hari Ini</div>
             </div>
         </div>
@@ -34,7 +39,7 @@
         <div class="card card-dashboard text-center">
             <div class="card-body">
                 <i class="fas fa-hourglass-half card-icon"></i>
-                <div class="statistic-value text-warning">8</div>
+                <div class="statistic-value text-warning">{{ $waitingQueues }}</div>
                 <div class="statistic-label">Menunggu Antrean</div>
             </div>
         </div>
@@ -43,8 +48,8 @@
         <div class="card card-dashboard text-center">
             <div class="card-body">
                 <i class="fas fa-check-circle card-icon"></i>
-                <div class="statistic-value text-primary">27</div>
-                <div class="statistic-label">Pelayanan Selesai</div>
+                <div class="statistic-value text-primary">{{ $completedServicesToday }}</div>
+                <div class="statistic-label">Pelayanan Selesai Hari Ini</div>
             </div>
         </div>
     </div>
@@ -67,54 +72,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr data-aos="fade-in" data-aos-delay="600">
-                        <td>A001</td>
-                        <td>Budi Santoso</td>
-                        <td>Pemeriksaan Umum</td>
-                        <td><span class="badge bg-warning">Menunggu</span></td>
+                    @forelse($currentQueues as $queueItem)
+                    <tr data-aos="fade-in" data-aos-delay="{{ 600 + ($loop->index * 100) }}">
+                        <td>{{ sprintf('%03d', $queueItem->queue_number) }}</td>
+                        <td>{{ $queueItem->patientDetail->user->name ?? 'N/A' }}</td>
+                        <td>{{ $queueItem->service->name ?? 'N/A' }}</td>
                         <td>
-                            <button class="btn btn-sm btn-primary me-1"><i class="fas fa-bell"></i></button>
-                            <button class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
+                            <span class="badge {{
+                                $queueItem->queue->status == 'waiting' ? 'bg-warning' :
+                                ($queueItem->queue->status == 'called' ? 'bg-info' : 'bg-secondary')
+                            }}">
+                                {{ Str::title($queueItem->queue->status ?? '-') }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ route('registrations.edit', $queueItem->id) }}" class="btn btn-sm btn-primary me-1" title="Edit Status Antrean"><i class="fas fa-edit"></i></a>
+                            <a href="{{ route('registrations.print', $queueItem->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Cetak Struk Antrean"><i class="fas fa-print"></i></a>
                         </td>
                     </tr>
-                    <tr data-aos="fade-in" data-aos-delay="700">
-                        <td>A002</td>
-                        <td>Siti Aminah</td>
-                        <td>Imunisasi</td>
-                        <td><span class="badge bg-warning">Menunggu</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary me-1"><i class="fas fa-bell"></i></button>
-                            <button class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
-                        </td>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">Tidak ada antrean yang menunggu atau dipanggil saat ini.</td>
                     </tr>
-                    <tr data-aos="fade-in" data-aos-delay="800">
-                        <td>A003</td>
-                        <td>Joko Susilo</td>
-                        <td>Kesehatan Gigi</td>
-                        <td><span class="badge bg-info">Dipanggil</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
-                        </td>
-                    </tr>
-                    <tr data-aos="fade-in" data-aos-delay="900">
-                        <td>A004</td>
-                        <td>Ani Nurmala</td>
-                        <td>KIA</td>
-                        <td><span class="badge bg-warning">Menunggu</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-primary me-1"><i class="fas fa-bell"></i></button>
-                            <button class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
-                        </td>
-                    </tr>
-                    <tr data-aos="fade-in" data-aos-delay="1000">
-                        <td>A005</td>
-                        <td>Rudi Hartono</td>
-                        <td>Konsultasi</td>
-                        <td><span class="badge bg-success">Selesai</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-print"></i></button>
-                        </td>
-                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -125,26 +105,20 @@
     <div class="col-lg-6" data-aos="fade-right" data-aos-delay="1100">
         <div class="card card-dashboard">
             <div class="card-header">
-                <i class="fas fa-chart-bar me-1"></i> Kunjungan Harian
+                <i class="fas fa-chart-bar me-1"></i> Kunjungan Harian (7 Hari Terakhir)
             </div>
             <div class="card-body p-2">
-                <div
-                    style="height: 250px; display: flex; align-items: center; justify-content: center; color: #6c757d; font-style: italic;">
-                    Grafik Kunjungan Harian
-                </div>
+                <canvas id="dailyVisitsChart" style="height: 250px;"></canvas>
             </div>
         </div>
     </div>
     <div class="col-lg-6" data-aos="fade-left" data-aos-delay="1200">
         <div class="card card-dashboard">
             <div class="card-header">
-                <i class="fas fa-pie-chart me-1"></i> Layanan Terpopuler
+                <i class="fas fa-pie-chart me-1"></i> Layanan Terpopuler (30 Hari Terakhir)
             </div>
             <div class="card-body p-2">
-                <div
-                    style="height: 250px; display: flex; align-items: center; justify-content: center; color: #6c757d; font-style: italic;">
-                    Grafik Jenis Layanan
-                </div>
+                <canvas id="popularServicesChart" style="height: 250px;"></canvas>
             </div>
         </div>
     </div>
@@ -162,49 +136,97 @@
                         <th>Nama Pasien</th>
                         <th>NIK</th>
                         <th>BPJS</th>
-                        <th>Tanggal</th>
-                        <th>Aksi</th>
+                        <th>Tanggal Dibuat</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr data-aos="fade-in" data-aos-delay="1400">
-                        <td>Dewi Lestari</td>
-                        <td>1234567890123456</td>
-                        <td><span class="badge bg-success">Aktif</span></td>
-                        <td>25/06/25</td>
-                        <td><button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></button></td>
+                    @forelse($latestPatients as $patient)
+                    <tr data-aos="fade-in" data-aos-delay="{{ 1400 + ($loop->index * 100) }}">
+                        <td>{{ $patient->user->name ?? 'N/A' }}</td>
+                        <td>{{ $patient->nik ?? '-' }}</td>
+                        <td><span class="badge {{ $patient->bpjs_status ? 'bg-success' : 'bg-secondary' }}">{{ $patient->bpjs_status ? 'Aktif' : 'Non Aktif' }}</span></td>
+                        <td>{{ $patient->created_at->format('d/m/y') }}</td>
                     </tr>
-                    <tr data-aos="fade-in" data-aos-delay="1500">
-                        <td>Rio Pratama</td>
-                        <td>6543210987654321</td>
-                        <td><span class="badge bg-secondary">Non Aktif</span></td>
-                        <td>24/06/25</td>
-                        <td><button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></button></td>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">Tidak ada data pasien terbaru.</td>
                     </tr>
-                    <tr data-aos="fade-in" data-aos-delay="1600">
-                        <td>Fitriani</td>
-                        <td>1122334455667788</td>
-                        <td><span class="badge bg-success">Aktif</span></td>
-                        <td>24/06/25</td>
-                        <td><button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></button></td>
-                    </tr>
-                    <tr data-aos="fade-in" data-aos-delay="1700">
-                        <td>Andi Wijaya</td>
-                        <td>9988776655443322</td>
-                        <td><span class="badge bg-success">Aktif</span></td>
-                        <td>23/06/25</td>
-                        <td><button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></button></td>
-                    </tr>
-                    <tr data-aos="fade-in" data-aos-delay="1800">
-                        <td>Sri Rahayu</td>
-                        <td>5566778899001122</td>
-                        <td><span class="badge bg-secondary">Non Aktif</span></td>
-                        <td>23/06/25</td>
-                        <td><button class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></button></td>
-                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Data for Daily Visits Chart
+        const dailyVisitsCtx = document.getElementById('dailyVisitsChart').getContext('2d');
+        new Chart(dailyVisitsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($dailyVisitsLabels),
+                datasets: [{
+                    label: 'Jumlah Kunjungan',
+                    data: @json($dailyVisitsData),
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {if (value % 1 === 0) {return value;}} // Show only whole numbers
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Data for Popular Services Chart
+        const popularServicesCtx = document.getElementById('popularServicesChart').getContext('2d');
+        new Chart(popularServicesCtx, {
+            type: 'pie', // Changed to pie chart for better representation of popular services
+            data: {
+                labels: @json($popularServicesLabels),
+                datasets: [{
+                    label: 'Jumlah Penggunaan',
+                    data: @json($popularServicesData),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right', // Position legend to the right
+                    }
+                }
+            }
+        });
+    });
+</script>
+@endpush

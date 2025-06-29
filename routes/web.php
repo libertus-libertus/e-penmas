@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatientDetailController;
 use App\Http\Controllers\PatientVisitController;
 use App\Http\Controllers\RegistrationController;
@@ -28,9 +29,11 @@ Route::get('/', function () {
 // Grup rute yang hanya bisa diakses setelah login
 Route::middleware(['auth'])->group(function () {
     // Route untuk Dashboard utama
-    Route::get('/dashboard', function () {
-        return view('dashboard'); // Sesuaikan jika nama file dashboard Anda berbeda
-    })->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('dashboard'); // Sesuaikan jika nama file dashboard Anda berbeda
+    // })->name('dashboard');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('users', UserController::class);
     Route::resource('services', ServiceController::class); 
