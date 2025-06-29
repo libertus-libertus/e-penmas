@@ -43,12 +43,13 @@
 
         {{-- KATEGORI: LAPORAN & RIWAYAT --}}
         <li class="sidebar-heading mt-3">Laporan & Riwayat</li>
-        {{-- MENU BARU: RIWAYAT KUNJUNGAN --}}
+        {{-- MENU: RIWAYAT KUNJUNGAN --}}
         <li class="{{ Request::routeIs('patient_visits.*') ? 'active' : '' }}">
             <a href="{{ route('patient_visits.index') }}"><i class="fas fa-history me-1"></i> Riwayat Kunjungan</a>
         </li>
-        <li>
-            <a href="#"><i class="fas fa-chart-bar me-1"></i> Laporan Statistik</a>
+        {{-- MENU BARU: LAPORAN & STATISTIK --}}
+        <li class="{{ Request::routeIs('reports.*') ? 'active' : '' }}">
+            <a href="{{ route('reports.index') }}"><i class="fas fa-chart-bar me-1"></i> Laporan & Statistik</a>
         </li>
 
         {{-- KATEGORI: LAIN-LAIN --}}

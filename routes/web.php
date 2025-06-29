@@ -4,6 +4,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PatientDetailController;
 use App\Http\Controllers\PatientVisitController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceScheduleController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('patient_visits', PatientVisitController::class)->except(['create', 'store', 'destroy']);
+
+    // --- Rute Baru untuk Modul Laporan & Statistik ---
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 });
 
 // Ini adalah rute bawaan Breeze untuk autentikasi (login, register, forgot password, dll.)

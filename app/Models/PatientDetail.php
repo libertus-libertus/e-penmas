@@ -43,4 +43,13 @@ class PatientDetail extends Model
     {
         return $this->hasMany(Registration::class);
     }
+
+    /**
+     * Get the patient visits for the patient.
+     * WAJIB: Relasi ini ditambahkan untuk menyelesaikan error.
+     */
+    public function patientVisits()
+    {
+        return $this->hasMany(PatientVisit::class);
+    }
 }
