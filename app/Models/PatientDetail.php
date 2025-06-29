@@ -35,4 +35,12 @@ class PatientDetail extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Relasi: Detail Pasien memiliki banyak Pendaftaran.
+     */
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
 }

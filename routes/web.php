@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PatientDetailController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceScheduleController;
 use Illuminate\Support\Facades\Route;
@@ -32,17 +33,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('services', ServiceController::class); 
     // CRUD Service Schedules (Jadwal Pelayanan)
     Route::resource('service_schedules', ServiceScheduleController::class);
-
-    // CRUD Patient Details (Detail Data Pasien)
-    // Menggunakan rute kustom karena relasi kuat dengan User
-    // Route::get('patient-details/{user}/create', [PatientDetailController::class, 'create'])->name('patient_details.create');
-    // Route::post('patient-details', [PatientDetailController::class, 'store'])->name('patient_details.store');
-    // Route::get('patient-details/{patient_detail}/edit', [PatientDetailController::class, 'edit'])->name('patient_details.edit');
-    // Route::put('patient-details/{patient_detail}', [PatientDetailController::class, 'update'])->name('patient_details.update');
-    // Delete tidak perlu karena akan cascade dari user deletion
     Route::resource('patients', PatientDetailController::class)->parameters([
         'patients' => 'patient' // Ini memberitahu Laravel bahwa {patient} di rute akan diikat ke model User
     ]);
+
+    // MODUL BARU: PENDAFTARAN PASIEN & ANTRIAN
+    Route::resource('registrations', RegistrationController::class);
+    Route::get('registrations/{id}/print', [RegistrationController::class, 'printQueue'])->name('registrations.print');
 });
 
 // Ini adalah rute bawaan Breeze untuk autentikasi (login, register, forgot password, dll.)

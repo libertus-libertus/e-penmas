@@ -18,7 +18,17 @@ class Service extends Model
      * Relasi: Jenis Pelayanan (Service) memiliki banyak Jadwal Layanan (ServiceSchedule).
      */
     public function serviceSchedules()
+    
     {
         return $this->hasMany(ServiceSchedule::class);
+    }
+
+
+    /**
+     * Relasi: Jenis Pelayanan memiliki banyak Pendaftaran.
+     */
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
     }
 }

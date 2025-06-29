@@ -131,8 +131,8 @@
                 @enderror
             </div>
 
-            <a href="{{ route('patients.index') }}" class="btn btn-action-secondary me-2">Batal</a> {{-- Mengarah ke daftar pasien --}}
-            <button type="submit" class="btn btn-action-primary">Simpan Pasien</button>
+            <a href="{{ route('patients.index') }}" class="btn btn-secondary me-2">Batal</a> {{-- Mengarah ke daftar pasien --}}
+            <button type="submit" class="btn btn-primary">Simpan Pasien</button>
         </form>
     </div>
 </div>

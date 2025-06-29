@@ -1,4 +1,4 @@
-<nav id="sidebar" class="animate__animated animate__fadeInLeft">
+<nav id="sidebar">
     <div class="sidebar-header">
         <h3><i class="fas fa-hospital-user me-1"></i> Dashboard</h3>
         <small>Puskesmas Sehat</small>
@@ -24,7 +24,7 @@
         <li class="{{ Request::routeIs('service_schedules.*') ? 'active' : '' }}">
             <a href="{{ route('service_schedules.index') }}"><i class="fas fa-calendar-alt me-1"></i> Manajemen Jadwal Layanan</a>
         </li>
-        {{-- MENU BARU: MANAJEMEN DATA PASIEN --}}
+        {{-- MENU: MANAJEMEN DATA PASIEN --}}
         <li class="{{ Request::routeIs('patients.*') ? 'active' : '' }}">
             <a href="{{ route('patients.index') }}"><i class="fas fa-users me-1"></i> Manajemen Data Pasien</a>
         </li>
@@ -32,15 +32,19 @@
 
         {{-- KATEGORI: OPERASIONAL --}}
         <li class="sidebar-heading mt-3">Operasional</li>
-        <li>
+        {{-- MENU: PENDAFTARAN & ANTRIAN --}}
+        {{-- Ini akan mengarah ke index Registrations, yang menampilkan daftar dan status antrean --}}
+        <li class="{{ Request::routeIs('registrations.*') ? 'active' : '' }}">
+            <a href="{{ route('registrations.index') }}"><i class="fas fa-clipboard-list me-1"></i> Pendaftaran & Antrean</a>
+        </li>
+        {{-- Menu 'Registrasi Pasien' yang terpisah bisa dihapus atau digabungkan ke 'Pendaftaran & Antrean' jika fungsi utamanya adalah membuat pendaftaran kunjungan --}}
+        {{-- <li>
             <a href="#"><i class="fas fa-user-plus me-1"></i> Registrasi Pasien</a>
-        </li>
-        <li>
-            <a href="#"><i class="fas fa-clipboard-list me-1"></i> Pendaftaran Kunjungan</a>
-        </li>
-        <li>
+        </li> --}}
+        {{-- Menu 'Manajemen Antrean' yang terpisah bisa dihapus atau digabungkan ke 'Pendaftaran & Antrean' --}}
+        {{-- <li>
             <a href="#"><i class="fas fa-hand-pointer me-1"></i> Manajemen Antrean</a>
-        </li>
+        </li> --}}
         <li>
             <a href="#"><i class="fas fa-stethoscope me-1"></i> Pencatatan Pelayanan</a>
         </li>
