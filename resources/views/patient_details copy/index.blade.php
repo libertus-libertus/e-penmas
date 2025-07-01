@@ -17,16 +17,13 @@ Daftar Pasien
 
 @section('content')
 
-{{-- Tabel Data Pasien --}}
+{{-- Tabel Data Pasien (Users) --}}
 <div class="card card-dashboard mb-4" data-aos="fade-up" data-aos-delay="200">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-users-cog me-1"></i> Daftar Pasien Rumah Sakit</span>
-        {{-- Tombol Tambah Pasien hanya untuk Admin --}}
-        @if(Auth::check() && Auth::user()->role === 'admin')
         <a href="{{ route('patients.create') }}" class="btn btn-action-primary btn-sm text-white">
             <i class="fas fa-plus me-1"></i> Tambah Pasien
         </a>
-        @endif
     </div>
     <div class="card-body">
         <div class="table-responsive table-responsive-custom">
@@ -39,18 +36,17 @@ Daftar Pasien
                         <th>Email</th>
                         <th>Nomor HP</th>
                         <th>Status BPJS</th>
-                        <th>Aksi</th>
+                        <th>Aksi</th> {{-- Tidak ada kolom 'Dibuat Pada' di sini agar sesuai dengan Users, tapi bisa ditambahkan jika mau --}}
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($patients as $patient) {{-- $patients adalah koleksi User model dengan role 'patient' --}}
+                    @foreach($patients as $patient) {{-- <--- PERUBAHAN DI SINI: $patients as $patient --}}
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $patient->name }}</td>
-                        {{-- Akses data dari patientDetail jika ada, jika tidak, tampilkan '-' --}}
-                        <td>{{ $patient->patientDetail->nik ?? '-' }}</td>
+                        <td>{{ $patient->patientDetail->nik ?? '-' }}</td> {{-- Akses NIK dari relasi patientDetail --}}
                         <td>{{ $patient->email }}</td>
-                        <td>{{ $patient->patientDetail->phone_number ?? '-' }}</td>
+                        <td>{{ $patient->patientDetail->phone_number ?? '-' }}</td> {{-- Akses No. HP dari relasi patientDetail --}}
                         <td>
                             @if($patient->patientDetail)
                                 <span class="badge {{ $patient->patientDetail->bpjs_status ? 'bg-success' : 'bg-secondary' }}">
@@ -61,28 +57,15 @@ Daftar Pasien
                             @endif
                         </td>
                         <td class="text-center">
-                            {{-- Tombol Detail - Mengirim ID User ke route show --}}
-                            <a href="{{ route('patients.show', $patient->id) }}" class="btn btn-info btn-sm me-1" title="Detail Pasien">
+                            {{-- Tombol Detail --}}
+                            <a href="{{ route('patients.show', $patient->id) }}" class="btn btn-info btn-sm me-1">
                                 <i class="fas fa-eye"></i> Detail
                             </a>
-                            
-                            {{-- Tombol Edit - Mengirim ID User ke route edit --}}
-                            {{-- Sekarang selalu aktif karena form edit bisa melengkapi data --}}
-                            <a href="{{ route('patients.edit', $patient->id) }}" class="btn btn-warning btn-sm me-1" title="Edit Pasien">
+                            {{-- Tombol Edit --}}
+                            <a href="{{ route('patients.edit', $patient->id) }}" class="btn btn-warning btn-sm me-1">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-
-                            {{-- Tombol Hapus - Hanya untuk Admin --}}
-                            @if(Auth::check() && Auth::user()->role === 'admin')
-                                <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" class="d-inline" id="delete-form-{{ $patient->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm btn-delete"
-                                        data-id="{{ $patient->id }}" data-name="{{ $patient->name }}">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </form>
-                            @endif
+                            {{-- FORM HAPUS DIHAPUS DARI SINI SESUAI INSTRUKSI --}}
                         </td>
                     </tr>
                     @endforeach
@@ -111,42 +94,32 @@ Daftar Pasien
             responsive: true,
             autoWidth: false
         });
-
-        // SweetAlert for delete confirmation
-        $('.btn-delete').on('click', function () {
-            const patientId = $(this).data('id');
-            const patientName = $(this).data('name');
-            const formId = '#delete-form-' + patientId;
-
-            Swal.fire({
-                title: 'Yakin ingin menghapus pasien?',
-                html: "Data pasien <strong>" + patientName + "</strong> akan dihapus permanen! Ini juga akan menghapus akun user terkait.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $(formId).submit();
-                }
-            });
-        });
-
-        // Initialize Toastr for session messages
-        @if(session('success'))
-        toastr.success("{{ session('success') }}");
-        @endif
-
-        @if(session('error'))
-        toastr.error("{{ session('error') }}");
-        @endif
-
-        @if($errors->any())
-        @foreach($errors->all() as $error)
-        toastr.error("{{ $error }}");
-        @endforeach
-        @endif
     });
 </script>
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        toastr.success(@json(session('success')));
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        toastr.error(@json(session('error')));
+    });
+</script>
+@endif
+
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @foreach($errors->all() as $error)
+            toastr.error(@json($error));
+        @endforeach
+    });
+</script>
+@endif
 @endpush

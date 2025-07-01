@@ -26,10 +26,35 @@
                     <li class="nav-item">
                         <a class="nav-link animate__animated animate__fadeInDown" href="#kontak">Kontak</a>
                     </li>
+
+                    {{-- Tampilkan tombol "Login Petugas" jika pengguna BELUM login --}}
+                    @guest
                     <li class="nav-item">
                         <a class="nav-link btn btn-light text-primary ms-lg-3 animate__animated animate__fadeInRight"
                             href="{{ route('login') }}">Login Petugas</a>
                     </li>
+                    @endguest
+
+                    {{-- Tampilkan dropdown "Akun Saya" jika pengguna SUDAH login --}}
+                    @auth
+                    <li class="nav-item dropdown ms-lg-3 animate__animated animate__fadeInRight">
+                        <a class="nav-link btn btn-primary text-white dropdown-toggle" href="#" id="navbarDropdownAkun" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Akun Saya <i class="fas fa-user-circle ms-1"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownAkun">
+                            <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard / Akun Saya</a></li>
+                            {{-- Anda mungkin perlu membuat route 'profile.edit' di aplikasi Anda --}}
+                            <li><a class="dropdown-item" href="#">Setting Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                    @endauth
                 </ul>
             </div>
         </div>

@@ -15,7 +15,7 @@ class PatientDetail extends Model
         'user_id',
         'nik',
         'address',
-        'birth_date', // Kolom ini yang perlu di-cast
+        'birth_date',
         'phone_number',
         'gender',
         'bpjs_status',

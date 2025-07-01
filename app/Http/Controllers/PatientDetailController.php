@@ -3,76 +3,85 @@
 namespace App\Http\Controllers;
 
 use App\Models\PatientDetail;
-use App\Models\User; // Pastikan ini di-import
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash; // Untuk hashing password
-use Illuminate\Validation\Rule; // Untuk validasi unique kompleks
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class PatientDetailController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     * Menampilkan daftar semua user dengan role 'patient' (untuk Datatables).
+     * Display a listing of the patients.
+     * Hanya bisa diakses oleh Admin.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        // Ambil semua user dengan role 'patient' beserta detail pasiennya
-        $patients = User::where('role', 'patient')->with('patientDetail')->latest()->get();
+        // Otorisasi sudah ditangani di rute melalui middleware role.admin
+        // if (Auth::user()->role !== 'admin') {
+        //      abort(403, 'Anda tidak memiliki hak akses untuk melihat daftar pasien.');
+        // }
+        // Ambil semua user dengan role 'patient' dan muat relasi patientDetail.
+        // User yang di-soft delete tidak akan diambil oleh where('role', 'patient') kecuali withTrashed() dipanggil pada User.
+        $patients = User::where('role', 'patient')
+                         ->with('patientDetail') // Cukup muat relasi patientDetail
+                         ->latest()->get();
+
         return view('patient_details.index', compact('patients'));
     }
 
     /**
-     * Show the form for creating a new resource (Pasien baru).
-     * Menampilkan form untuk menambah pasien baru (role otomatis 'patient').
+     * Show the form for creating a new patient.
+     * Hanya bisa diakses oleh Admin.
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        $genders = ['Laki-laki', 'Perempuan']; // Pilihan jenis kelamin
-        // Tidak perlu mengirim variabel $user karena ini untuk membuat user baru
-        return view('patient_details.create', compact('genders'));
+        return view('patient_details.create');
     }
 
     /**
-     * Store a newly created resource in storage (Menyimpan pasien baru).
-     * Membuat user baru dengan role 'patient' dan detail pasien terkait.
+     * Store a newly created patient in storage.
+     * Hanya bisa diakses oleh Admin.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        // Validasi data untuk tabel users dan patient_details
+        // Otorisasi sudah ditangani di rute melalui middleware role.admin
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'nik' => 'required|string|size:16|unique:patient_details,nik', // NIK harus 16 digit dan unik
-            'address' => 'required|string|max:255',
+            'nik' => 'required|string|digits:16|unique:patient_details,nik',
+            'address' => 'required|string',
             'birth_date' => 'required|date',
             'phone_number' => 'required|string|max:15',
-            'gender' => ['required', Rule::in(['Laki-laki', 'Perempuan'])],
+            'gender' => 'required|in:Laki-laki,Perempuan',
             'bpjs_status' => 'required|boolean',
         ], [
             'nik.unique' => 'NIK ini sudah terdaftar di sistem.',
-            'nik.size' => 'NIK harus 16 digit.',
+            'nik.digits' => 'NIK harus 16 digit.',
             'email.unique' => 'Email ini sudah digunakan oleh akun lain.',
         ]);
 
         try {
-            // 1. Buat user baru dengan role 'patient'
+            DB::beginTransaction();
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => 'patient', // Otomatis diset sebagai 'patient'
-                'position' => null, // Pasien tidak punya jabatan
+                'role' => 'patient',
+                'position' => null,
             ]);
 
-            // 2. Buat detail pasien terkait
             PatientDetail::create([
                 'user_id' => $user->id,
                 'nik' => $request->nik,
@@ -83,125 +92,220 @@ class PatientDetailController extends Controller
                 'bpjs_status' => $request->bpjs_status,
             ]);
 
+            DB::commit();
+
             return redirect()->route('patients.index')->with('success', 'Data pasien berhasil ditambahkan!');
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal menambahkan data pasien: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Failed to create patient: ' . $e->getMessage(), ['exception' => $e, 'request' => $request->all()]);
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menambahkan pasien: ' . $e->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
-     * Menampilkan detail seorang pasien.
+     * Dapat diakses oleh Admin, Staff, dan Pasien itu sendiri.
      *
-     * @param  \App\Models\User  $patient (Menggunakan Route Model Binding ke User dengan role patient)
+     * @param  \App\Models\User  $patient // Binding ke User model
      * @return \Illuminate\Http\Response
      */
-    public function show(User $patient) // Menggunakan $patient untuk objek User dengan role patient
+    public function show(User $patient) // $patient sekarang adalah instance User
     {
-        // Pastikan user yang diakses benar-benar pasien
+        // Pastikan user adalah 'patient'
         if (!$patient->hasRole('patient')) {
-            return redirect()->route('patients.index')->with('error', 'User ini bukan pasien.');
+            abort(403, 'User ini bukan pasien.');
+        }
+        // WAJIB: Memuat relasi patientDetail, dan di dalamnya, muat relasi user (yang mungkin di-soft delete)
+        $patient->load(['patientDetail.user' => function($query) {
+            $query->withTrashed();
+        }]);
+
+        // --- Logika Otorisasi untuk Show ---
+        if (Auth::user()->role === 'patient' && Auth::id() !== $patient->id) {
+            abort(403, 'Anda tidak memiliki akses untuk melihat detail pasien lain.');
         }
 
-        $patient->load('patientDetail'); // Eager load detail pasiennya
+        // Final validasi: Pastikan detail pasien ini terkait dengan user ber-role 'patient' dan user itu ada
+        // JIKA patientDetail TIDAK ADA, JANGAN REDIRECT. Biarkan view yang menanganinya.
+        // Cukup cek jika patientDetail ada TAPI user di dalamnya tidak ada atau role-nya bukan pasien.
+        if ($patient->patientDetail && (!$patient->patientDetail->user || $patient->patientDetail->user->role !== 'patient')) {
+             return redirect()->route('patients.index')->with('error', 'Detail pasien tidak valid: Akun pengguna tidak ditemukan atau bukan role pasien.');
+        }
+
         return view('patient_details.show', compact('patient'));
     }
 
     /**
      * Show the form for editing the specified resource.
-     * Menampilkan form untuk mengedit detail seorang pasien.
+     * Dapat diakses oleh Admin, Staff, dan Pasien itu sendiri.
      *
-     * @param  \App\Models\User  $patient (Menggunakan Route Model Binding ke User dengan role patient)
+     * @param  \App\Models\User  $patient // Binding ke User model
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $patient) // Menggunakan $patient untuk objek User dengan role patient
+    public function edit(User $patient) // $patient sekarang adalah instance User
     {
-        // Pastikan user yang diakses benar-benar pasien dan memiliki patientDetail
-        if (!$patient->hasRole('patient') || !$patient->patientDetail) {
-            return redirect()->route('patients.index')->with('error', 'User ini bukan pasien atau detail pasien tidak ditemukan.');
+        // Pastikan user adalah 'patient'
+        if (!$patient->hasRole('patient')) {
+            abort(403, 'User ini bukan pasien.');
+        }
+        // WAJIB: Memuat relasi patientDetail, dan di dalamnya, muat relasi user (yang mungkin di-soft delete)
+        $patient->load(['patientDetail.user' => function($query) {
+            $query->withTrashed();
+        }]);
+
+        // --- Logika Otorisasi untuk Edit ---
+        if (Auth::user()->role === 'admin' || Auth::user()->role === 'staff') {
+            // Admin/Staff bisa edit semua pasien
+        } elseif (Auth::user()->role === 'patient') {
+            // Pasien hanya bisa edit jika user_id mereka sama dengan user_id pasien ini
+            if (Auth::id() !== $patient->id) {
+                return redirect()->route('dashboard')->with('error', 'Anda tidak diizinkan mengedit detail pasien lain.');
+            }
+        } else {
+            // Role tidak dikenal atau tidak diizinkan
+            abort(403, 'Anda tidak memiliki hak akses untuk mengedit halaman ini.');
         }
 
-        $genders = ['Laki-laki', 'Perempuan'];
-        $patient->load('patientDetail'); // Eager load detail pasiennya
-        return view('patient_details.edit', compact('patient', 'genders'));
+        // Final validasi: Pastikan detail pasien ini terkait dengan user ber-role 'patient' dan user itu ada
+        // JIKA patientDetail TIDAK ADA, JANGAN REDIRECT. Biarkan form yang menanganinya.
+        // Cukup cek jika patientDetail ada TAPI user di dalamnya tidak ada atau role-nya bukan pasien.
+        if ($patient->patientDetail && (!$patient->patientDetail->user || $patient->patientDetail->user->role !== 'patient')) {
+            return redirect()->route('patients.index')->with('error', 'Detail pasien tidak valid: Akun pengguna tidak ditemukan atau bukan role pasien.');
+        }
+
+        return view('patient_details.edit', compact('patient'));
     }
 
     /**
-     * Update the specified resource in storage.
-     * Memperbarui detail seorang pasien.
+     * Update the specified patient (User model) in storage.
+     * Dapat diakses oleh Admin, Staff, dan Pasien itu sendiri.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $patient (Menggunakan Route Model Binding ke User dengan role patient)
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $patient // Binding ke User model
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $patient) // Menggunakan $patient untuk objek User dengan role patient
+    public function update(Request $request, User $patient) // $patient adalah instance User
     {
-        // Pastikan user yang diakses benar-benar pasien dan memiliki patientDetail
-        if (!$patient->hasRole('patient') || !$patient->patientDetail) {
-            return redirect()->route('patients.index')->with('error', 'User ini bukan pasien atau detail pasien tidak ditemukan.');
+        // Pastikan user adalah 'patient'
+        if (!$patient->hasRole('patient')) {
+            abort(403, 'User ini bukan pasien.');
+        }
+        // WAJIB: Memuat relasi patientDetail, dan di dalamnya, muat relasi user (yang mungkin di-soft delete)
+        $patient->load(['patientDetail.user' => function($query) {
+            $query->withTrashed();
+        }]);
+
+        // --- Logika Otorisasi untuk Update ---
+        if (Auth::user()->role === 'admin' || Auth::user()->role === 'staff') {
+            // Admin/Staff bisa update semua
+        } elseif (Auth::user()->role === 'patient') {
+            if (Auth::id() !== $patient->id) {
+                return redirect()->route('dashboard')->with('error', 'Anda tidak diizinkan memperbarui detail pasien lain.');
+            }
+        } else {
+            abort(403, 'Anda tidak memiliki hak akses untuk memperbarui halaman ini.');
         }
 
-        // Validasi data untuk tabel users dan patient_details
+        // Final validasi: Pastikan detail pasien ini terkait dengan user ber-role 'patient' dan user itu ada
+        // (Ini akan digunakan untuk validasi NIK/email unik)
+        // Jika patientDetail tidak ada, maka NIK dan lainnya akan dianggap baru dan tidak perlu ignore ID.
+        $patientDetailId = $patient->patientDetail->id ?? null;
+        $userId = $patient->id;
+
+        // Validasi data
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($patient->id)], // Email unik kecuali untuk user ini
-            'nik' => ['required', 'string', 'size:16', Rule::unique('patient_details', 'nik')->ignore($patient->patientDetail->id)], // NIK unik kecuali untuk detail pasien ini
-            'address' => 'required|string|max:255',
-            'birth_date' => 'required|date',
-            'phone_number' => 'required|string|max:15',
-            'gender' => ['required', Rule::in(['Laki-laki', 'Perempuan'])],
-            'bpjs_status' => 'required|boolean',
-            'password' => 'nullable|string|min:8|confirmed', // Password bisa kosong jika tidak diubah
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'password' => 'nullable|string|min:8|confirmed',
+            // NIK unik kecuali untuk patientDetail ini, jika patientDetail ada
+            'nik' => ['nullable', 'string', 'digits:16', Rule::unique('patient_details', 'nik')->ignore($patientDetailId)],
+            'address' => 'nullable|string', // Perbolehkan nullable jika belum lengkap
+            'birth_date' => 'nullable|date', // Perbolehkan nullable jika belum lengkap
+            'phone_number' => 'nullable|string|max:15', // Perbolehkan nullable jika belum lengkap
+            'gender' => 'nullable|in:Laki-laki,Perempuan', // Perbolehkan nullable jika belum lengkap
+            'bpjs_status' => 'nullable|boolean', // Perbolehkan nullable jika belum lengkap
         ], [
             'nik.unique' => 'NIK ini sudah terdaftar di sistem.',
-            'nik.size' => 'NIK harus 16 digit.',
+            'nik.digits' => 'NIK harus 16 digit.',
             'email.unique' => 'Email ini sudah digunakan oleh akun lain.',
         ]);
 
         try {
-            // 1. Update data user dasar
-            $patient->name = $request->name;
-            $patient->email = $request->email;
-            if ($request->filled('password')) {
-                $patient->password = Hash::make($request->password);
-            }
-            $patient->save();
+            DB::beginTransaction();
 
-            // 2. Update detail pasien
-            $patient->patientDetail->update([
-                'nik' => $request->nik,
-                'address' => $request->address,
-                'birth_date' => $request->birth_date,
-                'phone_number' => $request->phone_number,
-                'gender' => $request->gender,
-                'bpjs_status' => $request->bpjs_status,
+            $patient->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => $request->filled('password') ? Hash::make($request->password) : $patient->password,
             ]);
 
+            // Update atau Buat PatientDetail
+            if ($patient->patientDetail) {
+                // Jika patientDetail sudah ada, update
+                $patient->patientDetail->update([
+                    'nik' => $request->nik,
+                    'address' => $request->address,
+                    'birth_date' => $request->birth_date,
+                    'phone_number' => $request->phone_number,
+                    'gender' => $request->gender,
+                    'bpjs_status' => $request->bpjs_status,
+                ]);
+            } else {
+                // Jika patientDetail belum ada, buat baru
+                // Pastikan semua field yang required di PatientDetail terisi dari request
+                PatientDetail::create([
+                    'user_id' => $patient->id,
+                    'nik' => $request->nik,
+                    'address' => $request->address,
+                    'birth_date' => $request->birth_date,
+                    'phone_number' => $request->phone_number,
+                    'gender' => $request->gender,
+                    'bpjs_status' => $request->bpjs_status,
+                ]);
+            }
+
+            DB::commit();
+
+            // Redirect ke halaman detail pasien itu sendiri setelah update
             return redirect()->route('patients.show', $patient->id)->with('success', 'Data pasien berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data pasien: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Failed to update patient: ' . $e->getMessage(), ['exception' => $e, 'request' => $request->all()]);
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui data pasien: ' . $e->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
-     * Menghapus pasien (user dengan role patient) dan detailnya.
+     * Hanya bisa diakses oleh Admin.
      *
-     * @param  \App\Models\User  $patient (Menggunakan Route Model Binding ke User dengan role patient)
+     * @param  \App\Models\User  $patient // Binding ke User model
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $patient) // Menggunakan $patient untuk objek User dengan role patient
+    public function destroy(User $patient) // $patient adalah instance User
     {
-        // Pastikan user yang dihapus adalah pasien
-        if (!$patient->hasRole('patient')) {
-            return redirect()->route('patients.index')->with('error', 'User ini bukan pasien, tidak bisa dihapus dari modul ini.');
+        // Otorisasi sudah ditangani di rute melalui middleware role.admin.
+        if (Auth::user()->role !== 'admin') {
+             abort(403, 'Anda tidak memiliki hak akses untuk menghapus data pasien.');
         }
 
         try {
-            $patient->delete(); // Ini akan otomatis menghapus patientDetail berkat onDelete('cascade')
+            DB::beginTransaction();
+
+            // Pastikan user adalah pasien sebelum menghapus
+            if (!$patient->hasRole('patient')) {
+                abort(403, 'User ini bukan pasien, tidak bisa dihapus dari modul ini.');
+            }
+
+            // Soft delete User (ini akan otomatis menghapus PatientDetail berkat onDelete('cascade'))
+            $patient->delete();
+
+            DB::commit();
             return redirect()->route('patients.index')->with('success', 'Data pasien berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->route('patients.index')->with('error', 'Gagal menghapus data pasien: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Failed to delete patient: ' . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data pasien: ' . $e->getMessage());
         }
     }
 }
