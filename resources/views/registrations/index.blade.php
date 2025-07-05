@@ -70,7 +70,6 @@ Daftar Pendaftaran dan Status Antrean
                         <th>Nama Pasien</th>
                         <th>Layanan</th>
                         <th>Status Antrean</th>
-                        <th>Dibuat Pada</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -91,23 +90,22 @@ Daftar Pendaftaran dan Status Antrean
                                 {{ Str::title($registration->queue->status ?? 'N/A') }}
                             </span>
                         </td>
-                        <td>{{ $registration->created_at->format('Y-m-d H:i') }}</td>
                         <td class="text-center">
                             <a href="{{ route('registrations.show', $registration->id) }}" class="btn btn-info btn-sm me-1">
-                                <i class="fas fa-eye"></i> Detail
+                                <i class="fas fa-eye"></i>
                             </a>
                             {{-- Tombol Cetak Struk Antrean --}}
                             {{-- Tampil jika tidak di-soft delete dan status antrean bukan 'cancelled' --}}
                             @if(!$registration->trashed() && $registration->queue && $registration->queue->status !== 'cancelled')
                                 <a href="{{ route('registrations.print', $registration->id) }}" target="_blank" class="btn btn-primary btn-sm me-1">
-                                    <i class="fas fa-print"></i> Cetak
+                                    <i class="fas fa-print"></i>
                                 </a>
                             @endif
 
                             {{-- Hanya tampilkan tombol Edit Antrean jika status antrean bukan 'completed' atau 'cancelled' dan tidak di-soft delete --}}
                             @if($registration->queue && $registration->queue->status !== 'completed' && $registration->queue->status !== 'cancelled' && !$registration->trashed())
                                 <a href="{{ route('registrations.edit', $registration->id) }}" class="btn btn-warning btn-sm me-1">
-                                    <i class="fas fa-edit"></i> Edit Antrean
+                                    <i class="fas fa-edit"></i>
                                 </a>
                             @endif
                             {{-- Hanya tampilkan tombol "Batalkan" jika status antrean bukan 'completed' atau 'cancelled' dan tidak di-soft delete --}}
@@ -115,9 +113,9 @@ Daftar Pendaftaran dan Status Antrean
                                 <form action="{{ route('registrations.destroy', $registration->id) }}" method="POST" class="d-inline" id="delete-form-{{ $registration->id }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm btn-delete"
+                                    <button type="button"
                                         data-id="{{ $registration->id }}" data-queue-number="{{ sprintf('%03d', $registration->queue_number) }}">
-                                        <i class="fas fa-trash"></i> Batalkan
+                                        <i class="fas fa-trash bg-danger"></i>
                                     </button>
                                 </form>
                             @endif
@@ -149,14 +147,7 @@ Daftar Pendaftaran dan Status Antrean
 
 <script>
     $(document).ready(function () {
-        $('#registrationsTable').DataTable({
-            responsive: true,
-            autoWidth: false,
-            "order": [],
-            "columnDefs": [
-                { "orderable": false, "targets": [6] } // Aksi column index changed due to removed column
-            ]
-        });
+        $('#registrationsTable').DataTable();
 
         $('.btn-delete').on('click', function () {
             const registrationId = $(this).data('id');
