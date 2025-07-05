@@ -42,9 +42,10 @@
                             Akun Saya <i class="fas fa-user-circle ms-1"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownAkun">
-                            <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard / Akun Saya</a></li>
-                            {{-- Anda mungkin perlu membuat route 'profile.edit' di aplikasi Anda --}}
-                            <li><a class="dropdown-item" href="#">Setting Profile</a></li>
+                            {{-- Link ke Dashboard Pasien --}}
+                            <li><a class="dropdown-item" href="{{ route('patient.dashboard') }}">Dashboard</a></li>
+                            {{-- Link ke Profil Pasien --}}
+                            <li><a class="dropdown-item" href="{{ route('patient.profile.edit') }}">Setting Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">

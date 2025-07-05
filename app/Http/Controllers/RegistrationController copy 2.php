@@ -6,12 +6,11 @@ use App\Models\Registration;
 use App\Models\Queue;
 use App\Models\PatientDetail;
 use App\Models\Service;
-use App\Models\PatientVisit;
+use App\Models\PatientVisit; // WAJIB: Import PatientVisit model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth;
 
 class RegistrationController extends Controller
 {
@@ -53,7 +52,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Show the form for creating a new registration (for Admin).
+     * Show the form for creating a new registration.
      *
      * @return \Illuminate\View\View
      */
@@ -65,7 +64,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Store a newly created registration in storage (for Admin).
+     * Store a newly created registration in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
@@ -91,13 +90,13 @@ class RegistrationController extends Controller
                 'service_id' => $request->service_id,
                 'visit_date' => $request->visit_date,
                 'queue_number' => $newQueueNumber,
-                'status' => 'completed',
+                'status' => 'completed', // Registration status set to 'completed'
             ]);
 
             Queue::create([
                 'registration_id' => $registration->id,
                 'queue_number' => $newQueueNumber,
-                'status' => 'waiting',
+                'status' => 'waiting', // Queue status remains 'waiting'
             ]);
 
             DB::commit();
@@ -116,78 +115,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Display the form for patient to register for a service.
-     * Hanya dapat diakses oleh pasien yang login dan profilnya lengkap.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function createForPatient()
-    {
-        $user = Auth::user();
-        $patientDetail = $user->patientDetail;
-
-        $services = Service::all();
-
-        return view('patient_dashboard.register_service', compact('user', 'patientDetail', 'services'));
-    }
-
-    /**
-     * Store a new registration from a patient.
-     * Hanya dapat diakses oleh pasien yang login dan profilnya lengkap.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function storeForPatient(Request $request)
-    {
-        $user = Auth::user();
-        $patientDetail = $user->patientDetail;
-
-        $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'visit_date' => 'required|date|after_or_equal:today',
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            $lastQueueNumber = Registration::whereDate('visit_date', $request->visit_date)
-                                            ->withTrashed()
-                                            ->max('queue_number');
-            $newQueueNumber = ($lastQueueNumber ?? 0) + 1;
-
-            $registration = Registration::create([
-                'patient_detail_id' => $patientDetail->id,
-                'service_id' => $request->service_id,
-                'visit_date' => $request->visit_date,
-                'queue_number' => $newQueueNumber,
-                'status' => 'completed',
-            ]);
-
-            Queue::create([
-                'registration_id' => $registration->id,
-                'queue_number' => $newQueueNumber,
-                'status' => 'waiting',
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('patient.dashboard')->with('success', 'Pendaftaran layanan berhasil dibuat dengan nomor antrean ' . sprintf('%03d', $newQueueNumber) . '.');
-
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            Log::error('Validation failed during patient registration: ' . $e->getMessage(), ['errors' => $e->errors()]);
-            return redirect()->back()->withInput()->with('error', 'Validasi gagal: ' . $e->getMessage())->withErrors($e->errors());
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to create patient registration: ' . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat mendaftar layanan: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * Display the specified registration.
-     * Digunakan oleh Admin/Staff (untuk semua pendaftaran) dan Pasien (untuk pendaftaran sendiri).
      *
      * @param  int  $id
      * @return \Illuminate\View\View
@@ -195,36 +123,17 @@ class RegistrationController extends Controller
     public function show($id)
     {
         $registration = Registration::withTrashed()->with(['patientDetail.user', 'service', 'queue'])->findOrFail($id);
-
-        // Otorisasi: Admin/Staff bisa lihat semua. Pasien hanya bisa lihat pendaftarannya sendiri.
-        if (Auth::user()->role === 'patient') {
-            if (Auth::id() !== ($registration->patientDetail->user_id ?? null)) {
-                abort(403, 'Anda tidak memiliki akses untuk melihat pendaftaran pasien lain.');
-            }
-            // Jika pasien melihat pendaftarannya sendiri, gunakan view khusus pasien
-            return view('patient_dashboard.registration_detail', compact('registration'));
-        }
-
-        // Jika Admin/Staff, gunakan view umum
-        if ($registration->patientDetail && (!$registration->patientDetail->user || $registration->patientDetail->user->role !== 'patient')) {
-             return redirect()->route('registrations.index')->with('error', 'Detail pendaftaran tidak valid: Akun pengguna tidak ditemukan atau bukan role pasien.');
-        }
-
         return view('registrations.show', compact('registration'));
     }
 
     /**
-     * Show the form for editing the queue status (for Admin/Staff).
+     * Show the form for editing the queue status.
      *
      * @param  int  $id
      * @return \Illuminate\View\View
      */
     public function edit($id)
     {
-        if (Auth::user()->role === 'patient') {
-            abort(403, 'Anda tidak memiliki hak akses untuk mengedit antrean.');
-        }
-
         $registration = Registration::with(['patientDetail.user', 'service', 'queue'])->findOrFail($id);
 
         if ($registration->trashed() || ($registration->queue && $registration->queue->status === 'completed')) {
@@ -242,7 +151,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Update the queue status in storage (for Admin/Staff).
+     * Update the queue status in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -250,10 +159,6 @@ class RegistrationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role === 'patient') {
-            abort(403, 'Anda tidak memiliki hak akses untuk memperbarui antrean.');
-        }
-
         $request->validate([
             'status' => 'required|in:waiting,called,completed,skipped',
         ]);
@@ -279,10 +184,12 @@ class RegistrationController extends Controller
             $queue->status = $request->status;
             $queue->save();
 
+            // Registration status should be 'completed' if the queue status becomes 'completed'
             if ($request->status === 'completed') {
                 $registration->status = 'completed';
                 $registration->save();
 
+                // --- WAJIB: Otomatisasi pencatatan patient_visits di sini ---
                 PatientVisit::firstOrCreate(
                     [
                         'patient_detail_id' => $registration->patient_detail_id,
@@ -290,9 +197,10 @@ class RegistrationController extends Controller
                         'visit_date' => $registration->visit_date,
                     ],
                     [
-                        'status' => 'completed',
+                        'status' => 'completed', // Status kunjungan awal saat dibuat otomatis
                     ]
                 );
+                // -------------------------------------------------------------
             }
 
             DB::commit();
@@ -306,7 +214,7 @@ class RegistrationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update queue status: ' . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui status antrean: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui status antrean: ' . $e->getMessage());
         }
     }
 
@@ -318,10 +226,6 @@ class RegistrationController extends Controller
      */
     public function destroy($id)
     {
-        if (Auth::user()->role === 'patient') {
-            abort(403, 'Anda tidak memiliki hak akses untuk membatalkan pendaftaran.');
-        }
-
         try {
             DB::beginTransaction();
 
@@ -330,12 +234,19 @@ class RegistrationController extends Controller
             $registration->status = 'cancelled';
             $registration->save();
 
-            $registration->delete();
+            $registration->delete(); // Perform soft delete
 
             if ($registration->queue) {
                 $registration->queue->status = 'cancelled';
                 $registration->queue->save();
             }
+
+            // Optional: If a patient visit was automatically created,
+            // you might want to cancel it here as well.
+            // PatientVisit::where('patient_detail_id', $registration->patient_detail_id)
+            //             ->where('service_id', $registration->service_id)
+            //             ->where('visit_date', $registration->visit_date)
+            //             ->update(['status' => 'canceled']);
 
             DB::commit();
 
@@ -349,21 +260,14 @@ class RegistrationController extends Controller
 
     /**
      * Show the print-friendly queue ticket.
-     * Digunakan oleh Admin/Staff (untuk semua pendaftaran) dan Pasien (untuk pendaftaran sendiri).
      *
      * @param  int  $id Registration ID
      * @return \Illuminate\View\View
      */
     public function printQueue($id)
     {
+        // Load the registration with necessary relationships
         $registration = Registration::with(['patientDetail.user', 'service', 'queue'])->findOrFail($id);
-
-        // Otorisasi: Admin/Staff bisa cetak semua. Pasien hanya bisa cetak pendaftarannya sendiri.
-        if (Auth::user()->role === 'patient') {
-            if (Auth::id() !== ($registration->patientDetail->user_id ?? null)) {
-                abort(403, 'Anda tidak memiliki akses untuk mencetak antrean pasien lain.');
-            }
-        }
         return view('registrations.print_queue', compact('registration'));
     }
 }

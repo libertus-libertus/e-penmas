@@ -25,7 +25,7 @@ use App\Http\Controllers\PatientDashboardController;
 
 // Rute yang dapat diakses oleh Tamu (Frontend Website)
 Route::get('/', function () {
-    return view('home');
+    return view('home'); // Atau bisa diarahkan ke homepage frontend Anda
 });
 
 // --- GRUP RUTE UNTUK SISTEM MANAJEMEN (Backend Dashboard Admin/Staff) ---
@@ -67,26 +67,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/patient/dashboard', [PatientDashboardController::class, 'index'])->name('patient.dashboard')->middleware('role.patient');
 
     // Profil Pasien (Edit & Update) - Dapat diakses oleh Admin, Staff, DAN Pasien itu sendiri.
+    // WAJIB: Rute ini tidak memiliki parameter ID di URL, akan menggunakan Auth::user()
     Route::get('patient/profile/edit', [PatientDetailController::class, 'editSelf'])->name('patient.profile.edit')->middleware('role.patient');
     Route::put('patient/profile', [PatientDetailController::class, 'updateSelf'])->name('patient.profile.update')->middleware('role.patient');
 
     // Rute Show PatientDetail (digunakan oleh Admin/Staff untuk melihat detail pasien, dan pasien untuk melihat detailnya sendiri)
+    // Parameter {patient} di sini adalah ID dari User model
     Route::get('patients/{patient}', [PatientDetailController::class, 'show'])->name('patients.show')->middleware('role.staff_or_self_patient_access');
 
     // Rute Edit/Update PatientDetail (digunakan oleh Admin/Staff dari daftar pasien)
+    // Ini adalah rute yang sama dengan patient/profile/edit, tetapi namanya berbeda untuk konteks admin/staff
+    // Parameter {patient} di sini adalah ID dari User model
     Route::get('patients/{patient}/edit', [PatientDetailController::class, 'edit'])->name('patients.edit')->middleware('role.staff_or_self_patient_access');
     Route::put('patients/{patient}', [PatientDetailController::class, 'update'])->name('patients.update')->middleware('role.staff_or_self_patient_access');
-
-    // --- Rute untuk Pendaftaran Layanan Pasien ---
-    Route::get('patient/registrations/create', [RegistrationController::class, 'createForPatient'])->name('patient.registrations.create')->middleware(['role.patient', 'profile.complete']);
-    Route::post('patient/registrations', [RegistrationController::class, 'storeForPatient'])->name('patient.registrations.store')->middleware(['role.patient', 'profile.complete']);
-    
-    // --- Rute untuk Detail Pendaftaran & Cetak Antrean Pasien ---
-    Route::get('patient/registrations/{id}', [RegistrationController::class, 'show'])->name('patient.registrations.show')->middleware('role.patient'); // Reuses show method
-    Route::get('patient/registrations/{id}/print', [RegistrationController::class, 'printQueue'])->name('patient.registrations.print')->middleware('role.patient'); // Reuses printQueue method
-
-    // --- WAJIB: Rute Baru untuk Detail Riwayat Kunjungan Pasien ---
-    Route::get('patient/visits/{id}', [PatientVisitController::class, 'show'])->name('patient.visits.show')->middleware('role.patient'); // Reuses show method
 });
 
 

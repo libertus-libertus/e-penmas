@@ -1,11 +1,11 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard') {{-- Menggunakan layout dashboard umum --}}
 
 @section('title')
-    Edit Pasien - {{ $patient->name ?? 'N/A' }}
+    Edit Profil Pasien
 @endsection
 
 @section('sub_title')
-    Edit Data Pasien
+    Lengkapi Data Diri Anda
 @endsection
 
 @push('styles')
@@ -16,7 +16,7 @@
 @section('content')
 <div class="card card-dashboard mb-4" data-aos="fade-up" data-aos-delay="100">
     <div class="card-header">
-        <i class="fas fa-user-edit me-1"></i> Form Edit Pasien
+        <i class="fas fa-user-edit me-1"></i> Form Edit Profil Pasien
     </div>
     <div class="card-body">
         @if($errors->any())
@@ -31,12 +31,12 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('patients.update', $patient->id) }}">
+        <form method="POST" action="{{ route('patient.profile.update') }}"> {{-- Perhatikan: Tidak ada ID di action --}}
             @csrf
             @method('PUT')
             
             {{-- Data Akun Pasien --}}
-            <h5 class="mb-3">Data Akun & Demografi Pasien</h5>
+            <h5 class="mb-3">Data Akun Anda</h5>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="name" class="form-label">Nama Lengkap Pasien</label>
@@ -71,20 +71,23 @@
             <hr class="my-4">
 
             {{-- Data Detail Demografi Pasien --}}
-            <h5 class="mb-3">Detail Demografi Pasien</h5>
+            <h5 class="mb-3">Detail Demografi Pasien Anda</h5>
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle me-1"></i> Data di bawah ini wajib dilengkapi agar Anda dapat menggunakan fitur pendaftaran layanan.
+            </div>
+            
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="nik" class="form-label">NIK (Nomor Induk Kependudukan)</label>
-                    {{-- WAJIB: Gunakan optional() helper untuk patientDetail --}}
-                    <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik" name="nik" value="{{ old('nik', optional($patient->patientDetail)->nik ?? '') }}" required maxlength="16">
+                    <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik" name="nik" value="{{ old('nik', $patient->patientDetail->nik ?? '') }}" required maxlength="16">
                     @error('nik')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-6">
                     <label for="birth_date" class="form-label">Tanggal Lahir</label>
-                    {{-- WAJIB: Gunakan optional() helper untuk patientDetail --}}
-                    <input type="date" class="form-control @error('birth_date') is-invalid @enderror" id="birth_date" name="birth_date" value="{{ old('birth_date', optional($patient->patientDetail)->birth_date?->format('Y-m-d') ?? '') }}" required>
+                    {{-- WAJIB: Gunakan null coalescing operator untuk patientDetail, lalu null-safe untuk format --}}
+                    <input type="date" class="form-control @error('birth_date') is-invalid @enderror" id="birth_date" name="birth_date" value="{{ old('birth_date', $patient->patientDetail?->birth_date?->format('Y-m-d') ?? '') }}" required>
                     @error('birth_date')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -93,8 +96,7 @@
 
             <div class="mb-3">
                 <label for="address" class="form-label">Alamat Lengkap</label>
-                {{-- WAJIB: Gunakan optional() helper untuk patientDetail --}}
-                <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="3" required>{{ old('address', optional($patient->patientDetail)->address ?? '') }}</textarea>
+                <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="3" required>{{ old('address', $patient->patientDetail->address ?? '') }}</textarea>
                 @error('address')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -103,19 +105,17 @@
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
                     <label for="phone_number" class="form-label">Nomor HP</label>
-                    {{-- WAJIB: Gunakan optional() helper untuk patientDetail --}}
-                    <input type="text" class="form-control @error('phone_number') is-invalid @enderror" id="phone_number" name="phone_number" value="{{ old('phone_number', optional($patient->patientDetail)->phone_number ?? '') }}" required maxlength="15">
+                    <input type="text" class="form-control @error('phone_number') is-invalid @enderror" id="phone_number" name="phone_number" value="{{ old('phone_number', $patient->patientDetail->phone_number ?? '') }}" required maxlength="15">
                     @error('phone_number')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="col-md-4">
                     <label for="gender" class="form-label">Jenis Kelamin</label>
-                    {{-- WAJIB: Gunakan optional() helper untuk patientDetail --}}
                     <select class="form-select @error('gender') is-invalid @enderror" id="gender" name="gender" required>
                         <option value="">Pilih Jenis Kelamin</option>
-                        <option value="Laki-laki" {{ old('gender', optional($patient->patientDetail)->gender ?? '') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                        <option value="Perempuan" {{ old('gender', optional($patient->patientDetail)->gender ?? '') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                        <option value="Laki-laki" {{ old('gender', $patient->patientDetail->gender ?? '') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="Perempuan" {{ old('gender', $patient->patientDetail->gender ?? '') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
                     </select>
                     @error('gender')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -123,11 +123,10 @@
                 </div>
                 <div class="col-md-4">
                     <label for="bpjs_status" class="form-label">Status BPJS</label>
-                    {{-- WAJIB: Gunakan optional() helper untuk patientDetail --}}
                     <select class="form-select @error('bpjs_status') is-invalid @enderror" id="bpjs_status" name="bpjs_status" required>
                         <option value="">Pilih Status BPJS</option>
-                        <option value="1" {{ old('bpjs_status', optional($patient->patientDetail)->bpjs_status ?? '') == '1' ? 'selected' : '' }}>Aktif</option>
-                        <option value="0" {{ old('bpjs_status', optional($patient->patientDetail)->bpjs_status ?? '') == '0' ? 'selected' : '' }}>Tidak Aktif</option>
+                        <option value="1" {{ old('bpjs_status', $patient->patientDetail->bpjs_status ?? '') == '1' ? 'selected' : '' }}>Aktif</option>
+                        <option value="0" {{ old('bpjs_status', $patient->patientDetail->bpjs_status ?? '') == '0' ? 'selected' : '' }}>Tidak Aktif</option>
                     </select>
                     @error('bpjs_status')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -135,8 +134,8 @@
                 </div>
             </div>
 
-            <a href="{{ route('patients.index') }}" class="btn btn-secondary me-2">Batal</a>
-            <button type="submit" class="btn btn-primary">Update Pasien</button>
+            <a href="{{ route('patient.dashboard') }}" class="btn btn-secondary me-2">Batal</a>
+            <button type="submit" class="btn btn-primary">Update Profil</button>
         </form>
     </div>
 </div>

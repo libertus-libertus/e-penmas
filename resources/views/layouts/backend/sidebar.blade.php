@@ -6,14 +6,23 @@
     <ul class="list-unstyled components">
         {{-- KATEGORI: DASHBOARD UTAMA --}}
         <li class="sidebar-heading">Dashboard Utama</li>
-        {{-- Dashboard selalu bisa diakses oleh Admin dan Staff --}}
+        {{-- Dashboard Admin/Staff --}}
         @auth
             @if(Auth::user()->role === 'admin' || Auth::user()->role === 'staff')
                 <li class="{{ Request::routeIs('dashboard') ? 'active' : '' }}">
-                    <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i> Ringkasan</a>
+                    <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i> Ringkasan Admin/Staff</a>
                 </li>
             @endif
         @endauth
+        {{-- Dashboard Pasien --}}
+        @auth
+            @if(Auth::user()->role === 'patient')
+                <li class="{{ Request::routeIs('patient.dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('patient.dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i> Ringkasan Akun</a>
+                </li>
+            @endif
+        @endauth
+
 
         {{-- KATEGORI: DATA MASTER --}}
         {{-- Hanya tampilkan untuk Admin --}}
@@ -40,8 +49,7 @@
         @endauth
 
 
-        {{-- KATEGORI: OPERASIONAL --}}
-        {{-- Tampilkan untuk Admin dan Staff --}}
+        {{-- KATEGORI: OPERASIONAL (Admin & Staff) --}}
         @auth
             @if(Auth::user()->role === 'admin' || Auth::user()->role === 'staff')
                 <li class="sidebar-heading mt-3">Operasional</li>
@@ -56,9 +64,28 @@
             @endif
         @endauth
 
+        {{-- KATEGORI: AKTIVITAS PASIEN (Hanya untuk Pasien) --}}
+        @auth
+            @if(Auth::user()->role === 'patient')
+                <li class="sidebar-heading mt-3">Aktivitas Pasien</li>
+                {{-- MENU: PENDAFTARAN LAYANAN --}}
+                <li class="{{ Request::routeIs('patient.registrations.create') ? 'active' : '' }}">
+                    <a href="{{ route('patient.registrations.create') }}"><i class="fas fa-calendar-plus me-1"></i> Pendaftaran Layanan</a>
+                </li>
+                {{-- MENU BARU: PROFIL SAYA --}}
+                <li class="{{ Request::routeIs('patient.profile.edit') ? 'active' : '' }}">
+                    <a href="{{ route('patient.profile.edit') }}"><i class="fas fa-user-circle me-1"></i> Profil Saya</a>
+                </li>
+                {{-- MENU: RIWAYAT KUNJUNGAN SAYA --}}
+                {{-- Anda bisa menambahkan link ke riwayat kunjungan pasien di sini jika sudah ada modulnya --}}
+                {{-- <li class="{{ Request::routeIs('patient_visits.index') ? 'active' : '' }}">
+                    <a href="{{ route('patient_visits.index') }}"><i class="fas fa-history me-1"></i> Riwayat Kunjungan Saya</a>
+                </li> --}}
+            @endif
+        @endauth
 
-        {{-- KATEGORI: LAPORAN & RIWAYAT --}}
-        {{-- Tampilkan untuk Admin dan Staff --}}
+
+        {{-- KATEGORI: LAPORAN & RIWAYAT (Admin & Staff) --}}
         @auth
             @if(Auth::user()->role === 'admin' || Auth::user()->role === 'staff')
                 <li class="sidebar-heading mt-3">Laporan & Riwayat</li>

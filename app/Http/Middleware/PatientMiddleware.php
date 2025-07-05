@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class PatientRedirectMiddleware
+class PatientMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,11 +16,10 @@ class PatientRedirectMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Jika pengguna sudah login dan memiliki role 'patient'
         if (Auth::check() && Auth::user()->role === 'patient') {
-            // WAJIB: Alihkan pasien ke dashboard pasien khusus
-            return redirect()->route('patient.dashboard');
+            return $next($request);
         }
-        return $next($request);
+        // Jika bukan pasien, tolak akses atau redirect ke halaman yang sesuai
+        abort(403, 'Anda tidak memiliki akses sebagai Pasien.');
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Service;      // To filter by service
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth; // WAJIB: Import Auth facade
 
 class PatientVisitController extends Controller
 {
@@ -52,6 +53,7 @@ class PatientVisitController extends Controller
 
     /**
      * Display the specified patient visit.
+     * Digunakan oleh Admin/Staff (untuk semua riwayat) dan Pasien (untuk riwayat sendiri).
      *
      * @param  int  $id
      * @return \Illuminate\View\View
@@ -59,6 +61,17 @@ class PatientVisitController extends Controller
     public function show($id)
     {
         $patientVisit = PatientVisit::with(['patientDetail.user', 'service'])->findOrFail($id);
+
+        // Otorisasi: Admin/Staff bisa lihat semua. Pasien hanya bisa lihat riwayatnya sendiri.
+        if (Auth::user()->role === 'patient') {
+            if (Auth::id() !== ($patientVisit->patientDetail->user_id ?? null)) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat riwayat kunjungan pasien lain.');
+            }
+            // Jika pasien melihat riwayatnya sendiri, gunakan view khusus pasien
+            return view('patient_dashboard.visit_detail', compact('patientVisit'));
+        }
+
+        // Jika Admin/Staff, gunakan view umum
         return view('patient_visits.show', compact('patientVisit'));
     }
 
@@ -71,6 +84,11 @@ class PatientVisitController extends Controller
      */
     public function edit($id)
     {
+        // Otorisasi: Hanya Admin/Staff yang boleh mengedit status riwayat kunjungan
+        if (Auth::user()->role === 'patient') {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengedit riwayat kunjungan.');
+        }
+
         $patientVisit = PatientVisit::with(['patientDetail.user', 'service'])->findOrFail($id);
         $statuses = ['completed', 'canceled']; // Allowed statuses for patient visit
 
@@ -86,6 +104,11 @@ class PatientVisitController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Otorisasi: Hanya Admin/Staff yang boleh mengupdate status riwayat kunjungan
+        if (Auth::user()->role === 'patient') {
+            abort(403, 'Anda tidak memiliki hak akses untuk memperbarui riwayat kunjungan.');
+        }
+
         $request->validate([
             'status' => 'required|in:completed,canceled',
         ]);

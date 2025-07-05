@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PatientDetail extends Model
 {
     use HasFactory;
-
-    protected $table = 'patient_details';
+    // PatientDetail tidak perlu SoftDeletes karena penghapusan User akan meng-cascade PatientDetail
 
     protected $fillable = [
         'user_id',
@@ -21,23 +20,21 @@ class PatientDetail extends Model
         'bpjs_status',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'birth_date' => 'date', // <-- TAMBAHKAN ATAU UBAH INI
-        'bpjs_status' => 'boolean', // Rekomendasi: cast boolean juga untuk konsistensi
+        'birth_date' => 'date',
+        'bpjs_status' => 'boolean',
     ];
 
+    /**
+     * Get the user that owns the patient detail.
+     */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class); // WAJIB: Pastikan ini adalah definisi standar
     }
 
     /**
-     * Relasi: Detail Pasien memiliki banyak Pendaftaran.
+     * Get the registrations for the patient.
      */
     public function registrations()
     {
@@ -46,7 +43,6 @@ class PatientDetail extends Model
 
     /**
      * Get the patient visits for the patient.
-     * WAJIB: Relasi ini ditambahkan untuk menyelesaikan error.
      */
     public function patientVisits()
     {

@@ -1,11 +1,11 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard') {{-- UBAH INI: Pastikan meng-extend 'main' --}}
 
 @section('title')
-Manajemen Data Pasien
+Manajemen Pengguna
 @endsection
 
 @section('sub_title')
-Daftar Pasien
+Manajemen Aktivitas Pengguna
 @endsection
 
 @push('styles')
@@ -17,7 +17,7 @@ Daftar Pasien
 
 @section('content')
 
-{{-- Tabel Data Pasien --}}
+{{-- Tabel Data Pengguna (Users) --}}
 <div class="card card-dashboard mb-4" data-aos="fade-up" data-aos-delay="200">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-users-cog me-1"></i> Daftar Pasien Rumah Sakit</span>
@@ -33,7 +33,6 @@ Daftar Pasien
             <table class="table table-hover table-striped w-100" id="usersTable">
                 <thead>
                     <tr>
-                        <th>No</th>
                         <th>Nama Pasien</th>
                         <th>NIK</th>
                         <th>Email</th>
@@ -45,7 +44,6 @@ Daftar Pasien
                 <tbody>
                     @foreach($patients as $patient) {{-- $patients adalah koleksi User model dengan role 'patient' --}}
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
                         <td>{{ $patient->name }}</td>
                         {{-- Akses data dari patientDetail jika ada, jika tidak, tampilkan '-' --}}
                         <td>{{ $patient->patientDetail->nik ?? '-' }}</td>
@@ -63,13 +61,13 @@ Daftar Pasien
                         <td class="text-center">
                             {{-- Tombol Detail - Mengirim ID User ke route show --}}
                             <a href="{{ route('patients.show', $patient->id) }}" class="btn btn-info btn-sm me-1" title="Detail Pasien">
-                                <i class="fas fa-eye"></i> Detail
+                                <i class="fas fa-eye"></i> {{-- Hanya ikon --}}
                             </a>
                             
                             {{-- Tombol Edit - Mengirim ID User ke route edit --}}
                             {{-- Sekarang selalu aktif karena form edit bisa melengkapi data --}}
                             <a href="{{ route('patients.edit', $patient->id) }}" class="btn btn-warning btn-sm me-1" title="Edit Pasien">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> {{-- Hanya ikon --}}
                             </a>
 
                             {{-- Tombol Hapus - Hanya untuk Admin --}}
@@ -78,8 +76,8 @@ Daftar Pasien
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" class="btn btn-danger btn-sm btn-delete"
-                                        data-id="{{ $patient->id }}" data-name="{{ $patient->name }}">
-                                        <i class="fas fa-trash"></i> Hapus
+                                        data-id="{{ $patient->id }}" data-name="{{ $patient->name }}" title="Hapus Pasien">
+                                        <i class="fas fa-trash"></i> {{-- Hanya ikon --}}
                                     </button>
                                 </form>
                             @endif
@@ -112,15 +110,14 @@ Daftar Pasien
             autoWidth: false
         });
 
-        // SweetAlert for delete confirmation
         $('.btn-delete').on('click', function () {
-            const patientId = $(this).data('id');
-            const patientName = $(this).data('name');
-            const formId = '#delete-form-' + patientId;
+            const userId = $(this).data('id');
+            const userName = $(this).data('name');
+            const formId = '#delete-form-' + userId;
 
             Swal.fire({
-                title: 'Yakin ingin menghapus pasien?',
-                html: "Data pasien <strong>" + patientName + "</strong> akan dihapus permanen! Ini juga akan menghapus akun user terkait.",
+                title: 'Yakin ingin menghapus?',
+                html: "Pengguna <strong>" + userName + "</strong> akan dihapus!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Hapus!',
@@ -132,21 +129,32 @@ Daftar Pasien
                 }
             });
         });
-
-        // Initialize Toastr for session messages
-        @if(session('success'))
-        toastr.success("{{ session('success') }}");
-        @endif
-
-        @if(session('error'))
-        toastr.error("{{ session('error') }}");
-        @endif
-
-        @if($errors->any())
-        @foreach($errors->all() as $error)
-        toastr.error("{{ $error }}");
-        @endforeach
-        @endif
     });
 </script>
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        toastr.success(@json(session('success')));
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        toastr.error(@json(session('error')));
+    });
+</script>
+@endif
+
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @foreach($errors->all() as $error)
+            toastr.error(@json($error));
+        @endforeach
+    });
+</script>
+@endif
 @endpush
