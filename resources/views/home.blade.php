@@ -17,6 +17,8 @@
     @include('layouts.frontend.navbar')
 
     <main>
+
+        {{-- hero section / jumbotron --}}
         <section id="beranda" class="hero-section">
             <div class="container">
                 <div class="row">

@@ -41,7 +41,6 @@ class RegistrationController extends Controller
             });
         }
 
-
         $registrations = $query->orderBy('visit_date', 'desc')
                                 ->orderBy('queue_number', 'asc')
                                 ->get();
@@ -187,7 +186,6 @@ class RegistrationController extends Controller
 
     /**
      * Display the specified registration.
-     * Digunakan oleh Admin/Staff (untuk semua pendaftaran) dan Pasien (untuk pendaftaran sendiri).
      *
      * @param  int  $id
      * @return \Illuminate\View\View
@@ -196,12 +194,8 @@ class RegistrationController extends Controller
     {
         $registration = Registration::withTrashed()->with(['patientDetail.user', 'service', 'queue'])->findOrFail($id);
 
-        // Otorisasi: Admin/Staff bisa lihat semua. Pasien hanya bisa lihat pendaftarannya sendiri.
+        // Jika pasien melihat pendaftarannya, gunakan view khusus pasien
         if (Auth::user()->role === 'patient') {
-            if (Auth::id() !== ($registration->patientDetail->user_id ?? null)) {
-                abort(403, 'Anda tidak memiliki akses untuk melihat pendaftaran pasien lain.');
-            }
-            // Jika pasien melihat pendaftarannya sendiri, gunakan view khusus pasien
             return view('patient_dashboard.registration_detail', compact('registration'));
         }
 
@@ -349,7 +343,6 @@ class RegistrationController extends Controller
 
     /**
      * Show the print-friendly queue ticket.
-     * Digunakan oleh Admin/Staff (untuk semua pendaftaran) dan Pasien (untuk pendaftaran sendiri).
      *
      * @param  int  $id Registration ID
      * @return \Illuminate\View\View
@@ -357,13 +350,6 @@ class RegistrationController extends Controller
     public function printQueue($id)
     {
         $registration = Registration::with(['patientDetail.user', 'service', 'queue'])->findOrFail($id);
-
-        // Otorisasi: Admin/Staff bisa cetak semua. Pasien hanya bisa cetak pendaftarannya sendiri.
-        if (Auth::user()->role === 'patient') {
-            if (Auth::id() !== ($registration->patientDetail->user_id ?? null)) {
-                abort(403, 'Anda tidak memiliki akses untuk mencetak antrean pasien lain.');
-            }
-        }
         return view('registrations.print_queue', compact('registration'));
     }
 }

@@ -27,11 +27,11 @@
                         <a class="nav-link animate__animated animate__fadeInDown" href="#kontak">Kontak</a>
                     </li>
 
-                    {{-- Tampilkan tombol "Login Petugas" jika pengguna BELUM login --}}
+                    {{-- Tampilkan tombol "Login" jika pengguna BELUM login --}}
                     @guest
                     <li class="nav-item">
                         <a class="nav-link btn btn-light text-primary ms-lg-3 animate__animated animate__fadeInRight"
-                            href="{{ route('login') }}">Login Petugas</a>
+                            href="{{ route('login') }}">Login </a>
                     </li>
                     @endguest
 

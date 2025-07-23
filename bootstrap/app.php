@@ -12,16 +12,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            // 'auth' => \App\Http\Middleware\Authenticate::class,
-            // 'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-            // 'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // 'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-            // 'can' => \Illuminate\Auth\Middleware\Authorize::class,
-            // 'guest' => \App\Auth\Middleware\RedirectIfAuthenticated::class, // Pastikan ini mengarah ke RedirectIfAuthenticated yang benar
-            // 'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
-            // 'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-            // 'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-
             'role.admin' => \App\Http\Middleware\AdminMiddleware::class,
             'role.staff' => \App\Http\Middleware\StaffMiddleware::class,
             'role.patient' => \App\Http\Middleware\PatientMiddleware::class, // WAJIB: Alias untuk PatientMiddleware
