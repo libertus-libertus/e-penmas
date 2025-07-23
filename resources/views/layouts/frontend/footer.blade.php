@@ -22,7 +22,7 @@
                     <li class="mb-2"><a href="#informasi"><i class="fas fa-chevron-right me-2"></i>Informasi</a></li>
                     <li class="mb-2"><a href="#kontak"><i class="fas fa-chevron-right me-2"></i>Kontak</a></li>
                     <li class="mb-2"><a href="{{ route('login') }}"><i class="fas fa-chevron-right me-2"></i>Login
-                            Petugas</a></li>
+                            </a></li>
                 </ul>
             </div>
             <div class="col-md-4 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="300">

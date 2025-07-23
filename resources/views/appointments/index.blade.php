@@ -85,7 +85,7 @@ Daftar Catatan Pelayanan Pasien
                         <th>No. Antrean</th>
                         <th>Nama Pasien</th>
                         <th>Layanan Diberikan</th>
-                        <th>Petugas</th>
+                        <th>Dokter</th>
                         <th>Tanggal Pelayanan</th>
                         <th>Catatan</th>
                         <th>Aksi</th>

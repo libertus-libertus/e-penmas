@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Petugas Puskesmas</title>
+    <title>Login Puskesmas</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Animate.css -->
@@ -187,7 +187,7 @@
     <div class="login-container shadow-lg" data-aos="zoom-in" data-aos-duration="600">
         <div class="login-header">
             {{-- <img src="https://via.placeholder.com/80x80?text=Logo" alt="Puskesmas Logo" class="mb-3" width="80" height="80"> --}}
-            <h2 class="animate__animated animate__fadeInUp">Login Petugas</h2>
+            <h2 class="animate__animated animate__fadeInUp">Login</h2>
             <p class="animate__animated animate__fadeInUp animate__delay-1s">Sistem Pendaftaran & Pelayanan Puskesmas</p>
         </div>
 
@@ -203,7 +203,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                     <input id="email" type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                           value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Email Petugas">
+                           value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Masukkan Email">
                     @error('email')
                         <div class="invalid-feedback">
                             {{ $message }}
@@ -218,7 +218,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                     <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" 
-                           required autocomplete="current-password" placeholder="Password">
+                           required autocomplete="current-password" placeholder="Kata sandi">
                     @error('password')
                         <div class="invalid-feedback">
                             {{ $message }}

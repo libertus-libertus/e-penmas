@@ -115,7 +115,7 @@
             <div class="container" data-aos="fade-up" data-aos-duration="1000">
                 <h2>Siap Mendapatkan Pelayanan Kesehatan Terbaik?</h2>
                 <p class="lead">Jangan tunda lagi, kunjungi Puskesmas Nanggalo Siteba atau daftar online untuk pengalaman yang lebih cepat dan mudah.</p>
-                <a href="#pendaftaran-online" class="btn btn-lg btn-light text-secondary mt-3 animate__animated animate__pulse animate__infinite">Daftar Sekarang! <i class="fas fa-clipboard-list ms-2"></i></a>
+                <a href="{{ route('login') }}" class="btn btn-lg btn-light text-secondary mt-3 animate__animated animate__pulse animate__infinite">Daftar Sekarang! <i class="fas fa-clipboard-list ms-2"></i></a>
             </div>
         </section>
 
